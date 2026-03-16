@@ -38,8 +38,12 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController(text: widget.initialEmail);
-    _passwordController = TextEditingController();
+    _emailController = TextEditingController(
+      text: widget.initialEmail.isNotEmpty
+          ? widget.initialEmail
+          : 'admin@vernon.com',
+    );
+    _passwordController = TextEditingController(text: 'admin12345');
     _rememberMe = widget.initialRememberMe;
   }
 

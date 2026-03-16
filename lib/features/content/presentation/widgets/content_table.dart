@@ -65,12 +65,10 @@ class ContentTable extends StatelessWidget {
   }
 
   Widget _buildTitleCell(Content content) {
-    return Flexible(
-      child: Text(
-        content.title,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontWeight: FontWeight.w500),
-      ),
+    return Text(
+      content.title,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(fontWeight: FontWeight.w500),
     );
   }
 
