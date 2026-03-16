@@ -54,7 +54,7 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
         borderRadius: BorderRadius.circular(AppDimensions.radiusL),
       ),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
+        constraints: const BoxConstraints(maxWidth: 520),
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.spacingL),
           child: Form(
@@ -65,64 +65,9 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
               children: [
                 _buildHeader(context),
                 const SizedBox(height: AppDimensions.spacingL),
-                TextFormField(
-                  controller: _fileUrlController,
-                  decoration: const InputDecoration(
-                    labelText: AppStrings.mediaFileUrl,
-                    hintText: AppStrings.mediaFileUrlHint,
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.link),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppStrings.mediaFileUrlRequired;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                TextFormField(
-                  controller: _fileNameController,
-                  decoration: const InputDecoration(
-                    labelText: AppStrings.mediaFileName,
-                    hintText: AppStrings.mediaFileNameHint,
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.insert_drive_file),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppStrings.mediaFileNameRequired;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                TextFormField(
-                  controller: _altController,
-                  decoration: const InputDecoration(
-                    labelText: AppStrings.mediaAltText,
-                    hintText: AppStrings.mediaAltTextHint,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                TextFormField(
-                  controller: _captionController,
-                  decoration: const InputDecoration(
-                    labelText: AppStrings.mediaCaption,
-                    hintText: AppStrings.mediaCaptionHint,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: AppDimensions.spacingM),
-                TextFormField(
-                  controller: _folderController,
-                  decoration: const InputDecoration(
-                    labelText: AppStrings.mediaFolder,
-                    hintText: AppStrings.mediaFolderHint,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildDivider(),
+                const SizedBox(height: AppDimensions.spacingL),
+                _buildFields(),
                 const SizedBox(height: AppDimensions.spacingL),
                 _buildActions(context),
               ],
@@ -136,21 +81,123 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
   Widget _buildHeader(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.cloud_upload, color: AppColors.primary),
-        const SizedBox(width: AppDimensions.spacingS),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.primaryLight,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+          ),
+          child: const Icon(
+            Icons.cloud_upload_outlined,
+            color: AppColors.primary,
+            size: AppDimensions.iconM,
+          ),
+        ),
+        const SizedBox(width: AppDimensions.spacingM),
         const Expanded(
-          child: Text(
-            AppStrings.mediaUpload,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppStrings.mediaUpload,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                'Tambahkan file media via URL',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
         IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
+          style: IconButton.styleFrom(foregroundColor: AppColors.textSecondary),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDivider() {
+    return const Divider(color: AppColors.divider, height: 1);
+  }
+
+  Widget _buildFields() {
+    return Column(
+      children: [
+        TextFormField(
+          controller: _fileUrlController,
+          decoration: const InputDecoration(
+            labelText: AppStrings.mediaFileUrl,
+            hintText: AppStrings.mediaFileUrlHint,
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.link),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return AppStrings.mediaFileUrlRequired;
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: AppDimensions.spacingM),
+        TextFormField(
+          controller: _fileNameController,
+          decoration: const InputDecoration(
+            labelText: AppStrings.mediaFileName,
+            hintText: AppStrings.mediaFileNameHint,
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.insert_drive_file_outlined),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return AppStrings.mediaFileNameRequired;
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: AppDimensions.spacingM),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _altController,
+                decoration: const InputDecoration(
+                  labelText: AppStrings.mediaAltText,
+                  hintText: AppStrings.mediaAltTextHint,
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppDimensions.spacingM),
+            Expanded(
+              child: TextFormField(
+                controller: _folderController,
+                decoration: const InputDecoration(
+                  labelText: AppStrings.mediaFolder,
+                  hintText: AppStrings.mediaFolderHint,
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppDimensions.spacingM),
+        TextFormField(
+          controller: _captionController,
+          decoration: const InputDecoration(
+            labelText: AppStrings.mediaCaption,
+            hintText: AppStrings.mediaCaptionHint,
+            border: OutlineInputBorder(),
+          ),
         ),
       ],
     );
@@ -165,9 +212,9 @@ class _MediaUploadDialogState extends State<MediaUploadDialog> {
           child: const Text(AppStrings.cancel),
         ),
         const SizedBox(width: AppDimensions.spacingS),
-        ElevatedButton.icon(
+        FilledButton.icon(
           onPressed: _onSubmit,
-          icon: const Icon(Icons.cloud_upload),
+          icon: const Icon(Icons.cloud_upload_outlined, size: AppDimensions.iconM),
           label: const Text(AppStrings.mediaUpload),
         ),
       ],

@@ -315,6 +315,9 @@ class AppStrings {
   static const String mediaVideos = 'Video';
   static const String mediaAllFolders = 'Semua Folder';
   static const String mediaPickerTitle = 'Pilih Media';
+  static const String mediaViewDetail = 'Lihat Detail';
+  static const String mediaDescription =
+      'Kelola file gambar, dokumen, dan video untuk konten Anda.';
 
   // Domain Records
   static const String domainRecordAdd = 'Tambah';

@@ -21,14 +21,20 @@ class AppTheme {
 
     return base.copyWith(
       textTheme: GoogleFonts.manropeTextTheme(base.textTheme).copyWith(
-        bodyMedium: GoogleFonts.manrope(
-          fontSize: 14,
-          color: AppColors.textPrimary,
-        ),
-        bodyLarge: GoogleFonts.manrope(
-          fontSize: 16,
-          color: AppColors.textPrimary,
-        ),
+        displayLarge: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+        displayMedium: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+        displaySmall: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        headlineMedium: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        headlineSmall: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        titleLarge: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        titleMedium: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+        titleSmall: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+        bodyLarge: GoogleFonts.manrope(fontSize: 14, color: AppColors.textPrimary),
+        bodyMedium: GoogleFonts.manrope(fontSize: 13, color: AppColors.textPrimary),
+        bodySmall: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary),
+        labelLarge: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600),
+        labelMedium: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w500),
+        labelSmall: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textHint),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
@@ -52,7 +58,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(AppDimensions.radiusM),
           ),
           textStyle: GoogleFonts.manrope(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
         ),

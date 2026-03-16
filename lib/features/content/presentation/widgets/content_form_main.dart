@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
 
-/// Kolom utama form konten (kiri): title, slug, excerpt, body.
+/// Tab konten form: title, slug, excerpt, dan body WYSIWYG editor.
 class ContentFormMain extends StatelessWidget {
-  /// Controller untuk judul konten.
   final TextEditingController titleController;
-
-  /// Controller untuk slug konten.
   final TextEditingController slugController;
-
-  /// Controller untuk excerpt konten.
   final TextEditingController excerptController;
-
-  /// Controller untuk body konten.
-  final TextEditingController bodyController;
-
-  /// Callback saat slug diubah manual oleh user.
+  final QuillController quillController;
   final VoidCallback onSlugManualEdit;
 
   const ContentFormMain({
@@ -25,89 +18,178 @@ class ContentFormMain extends StatelessWidget {
     required this.titleController,
     required this.slugController,
     required this.excerptController,
-    required this.bodyController,
+    required this.quillController,
     required this.onSlugManualEdit,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.spacingL),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildTitleField(),
-            const SizedBox(height: AppDimensions.spacingM),
-            _buildSlugField(),
-            const SizedBox(height: AppDimensions.spacingM),
-            _buildExcerptField(),
-            const SizedBox(height: AppDimensions.spacingM),
-            _buildBodyField(),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTitleField(),
+        const SizedBox(height: AppDimensions.spacingM),
+        _buildSlugField(),
+        const SizedBox(height: AppDimensions.spacingM),
+        _buildExcerptField(),
+        const SizedBox(height: AppDimensions.spacingM),
+        _buildBodyEditor(context),
+      ],
+    );
+  }
+
+  Widget _buildTitleField() => TextFormField(
+        controller: titleController,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
         ),
-      ),
-    );
-  }
+        decoration: const InputDecoration(
+          hintText: AppStrings.contentTitleHint,
+          hintStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textHint,
+          ),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(
+            vertical: AppDimensions.spacingS,
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return AppStrings.contentTitleRequired;
+          }
+          return null;
+        },
+      );
 
-  Widget _buildTitleField() {
-    return TextFormField(
-      controller: titleController,
-      decoration: const InputDecoration(
-        labelText: AppStrings.contentTitle,
-        hintText: AppStrings.contentTitleHint,
-        border: OutlineInputBorder(),
-      ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return AppStrings.contentTitleRequired;
-        }
-        return null;
-      },
-    );
-  }
+  Widget _buildSlugField() => Row(
+        children: [
+          const Text(
+            'slug: ',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textHint,
+              fontFamily: 'monospace',
+            ),
+          ),
+          Expanded(
+            child: TextFormField(
+              controller: slugController,
+              onChanged: (_) => onSlugManualEdit(),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                fontFamily: 'monospace',
+              ),
+              decoration: const InputDecoration(
+                hintText: 'your-post-slug',
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                isDense: true,
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return AppStrings.contentSlugRequired;
+                }
+                return null;
+              },
+            ),
+          ),
+        ],
+      );
 
-  Widget _buildSlugField() {
-    return TextFormField(
-      controller: slugController,
-      decoration: const InputDecoration(
-        labelText: AppStrings.contentSlug,
-        hintText: AppStrings.contentSlugHint,
-        border: OutlineInputBorder(),
-      ),
-      onChanged: (_) => onSlugManualEdit(),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return AppStrings.contentSlugRequired;
-        }
-        return null;
-      },
-    );
-  }
+  Widget _buildExcerptField() => TextFormField(
+        controller: excerptController,
+        maxLines: 2,
+        style: const TextStyle(
+          fontSize: 13,
+          color: AppColors.textSecondary,
+          fontStyle: FontStyle.italic,
+        ),
+        decoration: const InputDecoration(
+          hintText: AppStrings.contentExcerptHint,
+          hintStyle: TextStyle(
+            fontSize: 13,
+            color: AppColors.textHint,
+            fontStyle: FontStyle.italic,
+          ),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: AppDimensions.spacingXS),
+        ),
+      );
 
-  Widget _buildExcerptField() {
-    return TextFormField(
-      controller: excerptController,
-      decoration: const InputDecoration(
-        labelText: AppStrings.contentExcerpt,
-        hintText: AppStrings.contentExcerptHint,
-        border: OutlineInputBorder(),
-      ),
-      maxLines: 3,
-    );
-  }
+  Widget _buildBodyEditor(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildEditorToolbar(context),
+          const Divider(color: AppColors.divider, height: 1),
+          Container(
+            constraints: const BoxConstraints(minHeight: 400),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.spacingS,
+              vertical: AppDimensions.spacingM,
+            ),
+            child: QuillEditor.basic(
+              controller: quillController,
+              config: QuillEditorConfig(
+                placeholder: AppStrings.contentBodyHint,
+                padding: EdgeInsets.zero,
+                autoFocus: false,
+                expands: false,
+                scrollable: false,
+                customStyles: DefaultStyles(
+                  paragraph: DefaultTextBlockStyle(
+                    const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                      height: 1.7,
+                    ),
+                    const HorizontalSpacing(0, 0),
+                    const VerticalSpacing(2, 2),
+                    const VerticalSpacing(0, 0),
+                    null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
 
-  Widget _buildBodyField() {
-    return TextFormField(
-      controller: bodyController,
-      decoration: const InputDecoration(
-        labelText: AppStrings.contentBody,
-        hintText: AppStrings.contentBodyHint,
-        border: OutlineInputBorder(),
-        alignLabelWithHint: true,
-      ),
-      maxLines: 15,
-      minLines: 10,
-    );
-  }
+  Widget _buildEditorToolbar(BuildContext context) => QuillSimpleToolbar(
+        controller: quillController,
+        config: const QuillSimpleToolbarConfig(
+          showFontFamily: false,
+          showFontSize: false,
+          showSubscript: false,
+          showSuperscript: false,
+          showColorButton: false,
+          showBackgroundColorButton: false,
+          showInlineCode: true,
+          showListCheck: false,
+          showCodeBlock: false,
+          showAlignmentButtons: false,
+          showIndent: false,
+          showRedo: true,
+          showUndo: true,
+          showDividers: true,
+          showClearFormat: true,
+          showSearchButton: false,
+          showClipboardPaste: false,
+          showClipboardCopy: false,
+          showClipboardCut: false,
+          toolbarSize: 40,
+          toolbarIconAlignment: WrapAlignment.start,
+          toolbarSectionSpacing: 4,
+        ),
+      );
 }

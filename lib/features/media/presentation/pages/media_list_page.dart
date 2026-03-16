@@ -80,12 +80,17 @@ class _MediaListViewState extends State<_MediaListView> {
         children: [
           _buildHeader(context),
           const SizedBox(height: AppDimensions.spacingL),
-          _buildFilters(context, folders),
+          _buildFilterCard(context, folders),
           const SizedBox(height: AppDimensions.spacingM),
-          MediaGrid(
-            files: files,
-            onTap: (file) => _showDetailDialog(context, file),
-          ),
+          _buildStatsRow(files),
+          const SizedBox(height: AppDimensions.spacingM),
+          if (files.isEmpty)
+            _buildEmptyState()
+          else
+            MediaGrid(
+              files: files,
+              onTap: (file) => _showDetailDialog(context, file),
+            ),
         ],
       ),
     );
@@ -93,95 +98,236 @@ class _MediaListViewState extends State<_MediaListView> {
 
   Widget _buildHeader(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          AppStrings.mediaTitle,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              AppStrings.mediaTitle,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingXS),
+            const Text(
+              AppStrings.mediaDescription,
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
-        ElevatedButton.icon(
+        FilledButton.icon(
           onPressed: () => _showUploadDialog(context),
-          icon: const Icon(Icons.cloud_upload),
+          icon: const Icon(Icons.cloud_upload_outlined, size: AppDimensions.iconM),
           label: const Text(AppStrings.mediaUpload),
         ),
       ],
     );
   }
 
-  Widget _buildFilters(BuildContext context, List<String> folders) {
-    return Wrap(
-      spacing: AppDimensions.spacingM,
-      runSpacing: AppDimensions.spacingS,
-      children: [
-        SizedBox(
-          width: 300,
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: AppStrings.mediaSearch,
-              prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        _applyFilters(context);
-                      },
-                    )
-                  : null,
-            ),
-            onSubmitted: (_) => _applyFilters(context),
-          ),
-        ),
-        SizedBox(
-          width: 180,
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedMimeType,
-            decoration: const InputDecoration(
-              labelText: AppStrings.mediaTypeFilter,
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(value: null, child: Text(AppStrings.mediaAllTypes)),
-              DropdownMenuItem(value: 'image', child: Text(AppStrings.mediaImages)),
-              DropdownMenuItem(
-                  value: 'application/pdf', child: Text(AppStrings.mediaDocuments)),
-              DropdownMenuItem(value: 'video', child: Text(AppStrings.mediaVideos)),
-            ],
-            onChanged: (value) {
-              setState(() => _selectedMimeType = value);
-              _applyFilters(context);
-            },
-          ),
-        ),
-        if (folders.isNotEmpty)
-          SizedBox(
-            width: 180,
-            child: DropdownButtonFormField<String>(
-              initialValue: _selectedFolder,
-              decoration: const InputDecoration(
-                labelText: AppStrings.mediaFolder,
-                border: OutlineInputBorder(),
-              ),
-              items: [
-                const DropdownMenuItem(
-                    value: null, child: Text(AppStrings.mediaAllFolders)),
-                ...folders.map(
-                  (f) => DropdownMenuItem(value: f, child: Text(f)),
-                ),
+  Widget _buildFilterCard(BuildContext context, List<String> folders) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        side: const BorderSide(color: AppColors.divider),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacingM),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 700;
+            if (isWide) {
+              return Row(
+                children: [
+                  Expanded(flex: 3, child: _buildSearchField(context)),
+                  const SizedBox(width: AppDimensions.spacingM),
+                  Expanded(child: _buildMimeTypeDropdown(context)),
+                  if (folders.isNotEmpty) ...[
+                    const SizedBox(width: AppDimensions.spacingM),
+                    Expanded(child: _buildFolderDropdown(context, folders)),
+                  ],
+                ],
+              );
+            }
+            return Wrap(
+              spacing: AppDimensions.spacingM,
+              runSpacing: AppDimensions.spacingS,
+              children: [
+                SizedBox(width: double.infinity, child: _buildSearchField(context)),
+                SizedBox(width: 180, child: _buildMimeTypeDropdown(context)),
+                if (folders.isNotEmpty)
+                  SizedBox(width: 180, child: _buildFolderDropdown(context, folders)),
               ],
-              onChanged: (value) {
-                setState(() => _selectedFolder = value);
-                _applyFilters(context);
-              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchField(BuildContext context) {
+    return TextField(
+      controller: _searchController,
+      decoration: InputDecoration(
+        hintText: AppStrings.mediaSearch,
+        hintStyle: const TextStyle(color: AppColors.textHint),
+        prefixIcon: const Icon(Icons.search, size: AppDimensions.iconM),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        ),
+        filled: true,
+        fillColor: AppColors.background,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingM,
+          vertical: AppDimensions.spacingS,
+        ),
+        isDense: true,
+        suffixIcon: _searchController.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, size: AppDimensions.iconM),
+                onPressed: () {
+                  _searchController.clear();
+                  _applyFilters(context);
+                },
+              )
+            : null,
+      ),
+      onSubmitted: (_) => _applyFilters(context),
+    );
+  }
+
+  Widget _buildMimeTypeDropdown(BuildContext context) {
+    return DropdownButtonFormField<String>(
+      value: _selectedMimeType,
+      decoration: InputDecoration(
+        labelText: AppStrings.mediaTypeFilter,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        ),
+        filled: true,
+        fillColor: AppColors.background,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingM,
+          vertical: AppDimensions.spacingS,
+        ),
+        isDense: true,
+      ),
+      items: const [
+        DropdownMenuItem(value: null, child: Text(AppStrings.mediaAllTypes)),
+        DropdownMenuItem(value: 'image', child: Text(AppStrings.mediaImages)),
+        DropdownMenuItem(
+            value: 'application/pdf', child: Text(AppStrings.mediaDocuments)),
+        DropdownMenuItem(value: 'video', child: Text(AppStrings.mediaVideos)),
+      ],
+      onChanged: (value) {
+        setState(() => _selectedMimeType = value);
+        _applyFilters(context);
+      },
+    );
+  }
+
+  Widget _buildFolderDropdown(BuildContext context, List<String> folders) {
+    return DropdownButtonFormField<String>(
+      value: _selectedFolder,
+      decoration: InputDecoration(
+        labelText: AppStrings.mediaFolder,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        ),
+        filled: true,
+        fillColor: AppColors.background,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingM,
+          vertical: AppDimensions.spacingS,
+        ),
+        isDense: true,
+      ),
+      items: [
+        const DropdownMenuItem(
+            value: null, child: Text(AppStrings.mediaAllFolders)),
+        ...folders.map(
+          (f) => DropdownMenuItem(value: f, child: Text(f)),
+        ),
+      ],
+      onChanged: (value) {
+        setState(() => _selectedFolder = value);
+        _applyFilters(context);
+      },
+    );
+  }
+
+  Widget _buildStatsRow(List<MediaFile> files) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.spacingM,
+            vertical: AppDimensions.spacingXS,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.primaryLight,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusCircle),
+          ),
+          child: Text(
+            '${files.length} file',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
             ),
           ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppDimensions.spacingXXL),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.perm_media_outlined,
+                size: AppDimensions.avatarL,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingM),
+            const Text(
+              'Belum ada media',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacingS),
+            const Text(
+              'Upload file pertama Anda untuk memulai',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -265,8 +411,7 @@ class _MediaListViewState extends State<_MediaListView> {
             ),
             const SizedBox(height: AppDimensions.spacingM),
             ElevatedButton(
-              onPressed: () =>
-                  context.read<MediaListCubit>().loadMedia(),
+              onPressed: () => context.read<MediaListCubit>().loadMedia(),
               child: const Text(AppStrings.retry),
             ),
           ],

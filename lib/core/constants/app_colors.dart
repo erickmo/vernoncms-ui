@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Primary — MatDash Blue (#5D87FF)
-  static const Color primary = Color(0xFF5D87FF);
-  static const Color primaryLight = Color(0xFFECF2FF);
-  static const Color primaryDark = Color(0xFF4570EA);
+  // Primary — Purple (#4D2975)
+  static const Color primary = Color(0xFF4D2975);
+  static const Color primaryLight = Color(0xFFF0EBF8);
+  static const Color primaryDark = Color(0xFF3A1E5A);
 
   // Secondary — MatDash Cyan (#49BEFF)
   static const Color secondary = Color(0xFF49BEFF);
@@ -38,20 +38,20 @@ class AppColors {
   // Sidebar — White sidebar style (MatDash)
   static const Color sidebarBackground = Color(0xFFFFFFFF);
   static const Color sidebarBorder = Color(0xFFE5EAF2);
-  static const Color sidebarItemActive = Color(0xFF5D87FF);
-  static const Color sidebarItemActiveBg = Color(0xFFECF2FF);
-  static const Color sidebarItemHover = Color(0xFFF4F7FF);
+  static const Color sidebarItemActive = Color(0xFF4D2975);
+  static const Color sidebarItemActiveBg = Color(0xFFF0EBF8);
+  static const Color sidebarItemHover = Color(0xFFF7F4FC);
   static const Color sidebarText = Color(0xFF5A6A85);
-  static const Color sidebarTextActive = Color(0xFF5D87FF);
+  static const Color sidebarTextActive = Color(0xFF4D2975);
   static const Color sidebarSectionTitle = Color(0xFFA0AFC0);
 
   // Chart
-  static const Color chartLine = Color(0xFF5D87FF);
-  static const Color chartFill = Color(0x335D87FF);
+  static const Color chartLine = Color(0xFF4D2975);
+  static const Color chartFill = Color(0x334D2975);
   static const Color chartGrid = Color(0xFFE5EAF2);
 
   // Accent card colors (stat cards)
-  static const Color cardAccentBlue = Color(0xFF5D87FF);
+  static const Color cardAccentBlue = Color(0xFF4D2975);
   static const Color cardAccentGreen = Color(0xFF13DEB9);
   static const Color cardAccentOrange = Color(0xFFFFAE1F);
   static const Color cardAccentCyan = Color(0xFF49BEFF);

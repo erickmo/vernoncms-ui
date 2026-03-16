@@ -19,8 +19,8 @@ class AppDimensions {
   static const double radiusCircle = 999.0;
 
   // Icon
-  static const double iconS = 16.0;
-  static const double iconM = 24.0;
+  static const double iconS = 15.0;
+  static const double iconM = 20.0;
   static const double iconL = 32.0;
 
   // Avatar
@@ -29,11 +29,11 @@ class AppDimensions {
   static const double avatarL = 64.0;
 
   // Button
-  static const double buttonHeight = 48.0;
-  static const double buttonHeightS = 36.0;
+  static const double buttonHeight = 38.0;
+  static const double buttonHeightS = 32.0;
 
   // AppBar
-  static const double appBarHeight = 56.0;
+  static const double appBarHeight = 52.0;
 
   // Sidebar (CMS web)
   static const double sidebarWidth = 260.0;

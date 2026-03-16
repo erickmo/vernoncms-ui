@@ -47,7 +47,15 @@ class DomainBuilderRemoteDataSourceImpl
     try {
       final response = await _apiClient.dio.get('/api/v1/domains');
 
-      final list = response.data as List<dynamic>;
+      final raw = response.data;
+      final List<dynamic> list;
+      if (raw is List) {
+        list = raw;
+      } else if (raw is Map<String, dynamic> && raw['data'] is List) {
+        list = raw['data'] as List<dynamic>;
+      } else {
+        list = [];
+      }
       return list
           .map((e) =>
               DomainDefinitionModel.fromJson(e as Map<String, dynamic>))
@@ -64,9 +72,14 @@ class DomainBuilderRemoteDataSourceImpl
   Future<DomainDefinitionModel> getDomainDetail(String id) async {
     try {
       final response = await _apiClient.dio.get('/api/v1/domains/$id');
-      return DomainDefinitionModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      final raw = response.data;
+      final Map<String, dynamic> json;
+      if (raw is Map<String, dynamic> && raw['data'] is Map<String, dynamic>) {
+        json = raw['data'] as Map<String, dynamic>;
+      } else {
+        json = raw as Map<String, dynamic>;
+      }
+      return DomainDefinitionModel.fromJson(json);
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -84,9 +97,14 @@ class DomainBuilderRemoteDataSourceImpl
         '/api/v1/domains',
         data: data,
       );
-      return DomainDefinitionModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      final raw = response.data;
+      final Map<String, dynamic> json;
+      if (raw is Map<String, dynamic> && raw['data'] is Map<String, dynamic>) {
+        json = raw['data'] as Map<String, dynamic>;
+      } else {
+        json = raw as Map<String, dynamic>;
+      }
+      return DomainDefinitionModel.fromJson(json);
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -105,9 +123,14 @@ class DomainBuilderRemoteDataSourceImpl
         '/api/v1/domains/$id',
         data: data,
       );
-      return DomainDefinitionModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      final raw = response.data;
+      final Map<String, dynamic> json;
+      if (raw is Map<String, dynamic> && raw['data'] is Map<String, dynamic>) {
+        json = raw['data'] as Map<String, dynamic>;
+      } else {
+        json = raw as Map<String, dynamic>;
+      }
+      return DomainDefinitionModel.fromJson(json);
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),

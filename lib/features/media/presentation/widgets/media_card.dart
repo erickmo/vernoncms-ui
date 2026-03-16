@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/media_file.dart';
 
 /// Card tunggal untuk menampilkan file media dalam grid.
-class MediaCard extends StatelessWidget {
+/// Menampilkan thumbnail, file type badge, nama file, dan ukuran.
+/// Saat hover menampilkan overlay dengan tombol "Lihat Detail".
+class MediaCard extends StatefulWidget {
   /// File media yang ditampilkan.
   final MediaFile file;
 
@@ -19,23 +22,48 @@ class MediaCard extends StatelessWidget {
   });
 
   @override
+  State<MediaCard> createState() => _MediaCardState();
+}
+
+class _MediaCardState extends State<MediaCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 1,
+      elevation: _isHovered ? 4 : 1,
+      shadowColor: _isHovered
+          ? AppColors.primary.withValues(alpha: 0.2)
+          : Colors.black12,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        side: BorderSide(
+          color: _isHovered ? AppColors.primary.withValues(alpha: 0.3) : AppColors.divider,
+        ),
       ),
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: _buildThumbnail(),
-            ),
-            _buildInfo(),
-          ],
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _buildThumbnail(),
+                    _buildTypeBadge(),
+                    if (_isHovered) _buildHoverOverlay(),
+                  ],
+                ),
+              ),
+              _buildInfo(),
+            ],
+          ),
         ),
       ),
     );
@@ -43,7 +71,7 @@ class MediaCard extends StatelessWidget {
 
   Widget _buildThumbnail() {
     if (_isImage) {
-      final url = file.thumbnailUrl ?? file.fileUrl;
+      final url = widget.file.thumbnailUrl ?? widget.file.fileUrl;
       return Image.network(
         url,
         fit: BoxFit.cover,
@@ -66,6 +94,59 @@ class MediaCard extends StatelessWidget {
     );
   }
 
+  Widget _buildTypeBadge() {
+    return Positioned(
+      top: AppDimensions.spacingS,
+      left: AppDimensions.spacingS,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingS,
+          vertical: AppDimensions.spacingXS,
+        ),
+        decoration: BoxDecoration(
+          color: _badgeColor.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusS),
+        ),
+        child: Text(
+          _fileTypeLabel,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHoverOverlay() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.45),
+      ),
+      child: Center(
+        child: ElevatedButton.icon(
+          onPressed: widget.onTap,
+          icon: const Icon(Icons.visibility, size: 16),
+          label: const Text(
+            AppStrings.mediaViewDetail,
+            style: TextStyle(fontSize: 12),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: AppColors.textPrimary,
+            elevation: 2,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.spacingM,
+              vertical: AppDimensions.spacingS,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildInfo() {
     return Padding(
       padding: const EdgeInsets.all(AppDimensions.spacingS),
@@ -73,7 +154,7 @@ class MediaCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            file.fileName,
+            widget.file.fileName,
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -86,7 +167,7 @@ class MediaCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                _formatFileSize(file.fileSize),
+                _formatFileSize(widget.file.fileSize),
                 style: const TextStyle(
                   fontSize: 11,
                   color: AppColors.textSecondary,
@@ -94,7 +175,7 @@ class MediaCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                _formatDate(file.createdAt),
+                _formatDate(widget.file.createdAt),
                 style: const TextStyle(
                   fontSize: 11,
                   color: AppColors.textSecondary,
@@ -107,18 +188,37 @@ class MediaCard extends StatelessWidget {
     );
   }
 
-  bool get _isImage => file.mimeType.startsWith('image/');
+  bool get _isImage => widget.file.mimeType.startsWith('image/');
 
   IconData get _mimeTypeIcon {
-    if (file.mimeType.startsWith('image/')) return Icons.photo;
-    if (file.mimeType == 'application/pdf') return Icons.picture_as_pdf;
-    if (file.mimeType.startsWith('video/')) return Icons.videocam;
-    if (file.mimeType.contains('word') ||
-        file.mimeType.contains('document') ||
-        file.mimeType.contains('text/')) {
+    if (widget.file.mimeType.startsWith('image/')) return Icons.photo;
+    if (widget.file.mimeType == 'application/pdf') return Icons.picture_as_pdf;
+    if (widget.file.mimeType.startsWith('video/')) return Icons.videocam;
+    if (widget.file.mimeType.contains('word') ||
+        widget.file.mimeType.contains('document') ||
+        widget.file.mimeType.contains('text/')) {
       return Icons.description;
     }
     return Icons.insert_drive_file;
+  }
+
+  String get _fileTypeLabel {
+    if (widget.file.mimeType.startsWith('image/')) return 'IMAGE';
+    if (widget.file.mimeType == 'application/pdf') return 'PDF';
+    if (widget.file.mimeType.startsWith('video/')) return 'VIDEO';
+    if (widget.file.mimeType.contains('word') ||
+        widget.file.mimeType.contains('document')) {
+      return 'DOC';
+    }
+    if (widget.file.mimeType.startsWith('text/')) return 'TEXT';
+    return 'FILE';
+  }
+
+  Color get _badgeColor {
+    if (widget.file.mimeType.startsWith('image/')) return AppColors.primary;
+    if (widget.file.mimeType == 'application/pdf') return AppColors.error;
+    if (widget.file.mimeType.startsWith('video/')) return AppColors.warning;
+    return AppColors.textSecondary;
   }
 
   String _formatFileSize(int bytes) {

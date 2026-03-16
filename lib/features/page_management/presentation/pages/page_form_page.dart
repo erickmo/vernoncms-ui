@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -49,8 +47,8 @@ class _PageFormViewState extends State<_PageFormView> {
 
   late final TextEditingController _nameController;
   late final TextEditingController _slugController;
-  late final TextEditingController _variablesController;
 
+  Map<String, dynamic> _variables = {};
   bool _isActive = true;
   bool _autoSlug = true;
   bool _initialized = false;
@@ -62,7 +60,6 @@ class _PageFormViewState extends State<_PageFormView> {
     super.initState();
     _nameController = TextEditingController();
     _slugController = TextEditingController();
-    _variablesController = TextEditingController(text: '{}');
 
     _nameController.addListener(_onNameChanged);
 
@@ -75,7 +72,6 @@ class _PageFormViewState extends State<_PageFormView> {
   void dispose() {
     _nameController.dispose();
     _slugController.dispose();
-    _variablesController.dispose();
     super.dispose();
   }
 
@@ -98,15 +94,8 @@ class _PageFormViewState extends State<_PageFormView> {
     _nameController.text = page.name;
     _slugController.text = page.slug;
 
-    // Prettify variables JSON.
-    try {
-      const encoder = JsonEncoder.withIndent('  ');
-      _variablesController.text = encoder.convert(page.variables);
-    } catch (_) {
-      _variablesController.text = '{}';
-    }
-
     setState(() {
+      _variables = Map<String, dynamic>.from(page.variables);
       _isActive = page.isActive;
       _autoSlug = false;
       _initialized = true;
@@ -115,31 +104,6 @@ class _PageFormViewState extends State<_PageFormView> {
 
   void _onSave() {
     if (!_formKey.currentState!.validate()) return;
-
-    // Parse variables JSON.
-    Map<String, dynamic> variables;
-    try {
-      final parsed = json.decode(_variablesController.text.trim());
-      if (parsed is Map<String, dynamic>) {
-        variables = parsed;
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(AppStrings.pageVariablesInvalid),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
-      }
-    } catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.pageVariablesInvalid),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
 
     final cubit = context.read<PageFormCubit>();
     final now = DateTime.now();
@@ -155,7 +119,7 @@ class _PageFormViewState extends State<_PageFormView> {
       id: existingPage?.id ?? '',
       name: _nameController.text.trim(),
       slug: _slugController.text.trim(),
-      variables: variables,
+      variables: _variables,
       isActive: _isActive,
       createdAt: existingPage?.createdAt ?? now,
       updatedAt: now,
@@ -309,7 +273,8 @@ class _PageFormViewState extends State<_PageFormView> {
     return PageFormMain(
       nameController: _nameController,
       slugController: _slugController,
-      variablesController: _variablesController,
+      variables: _variables,
+      onVariablesChanged: (v) => setState(() => _variables = v),
       onSlugManualEdit: () => _autoSlug = false,
     );
   }

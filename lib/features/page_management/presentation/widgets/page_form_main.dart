@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
+import 'page_variables_table.dart';
 
-/// Panel utama form halaman (kiri): Name, Slug, Variables JSON.
+/// Panel utama form halaman (kiri): Name, Slug, Variables table.
 class PageFormMain extends StatelessWidget {
   /// Controller untuk nama halaman.
   final TextEditingController nameController;
@@ -12,8 +13,11 @@ class PageFormMain extends StatelessWidget {
   /// Controller untuk slug.
   final TextEditingController slugController;
 
-  /// Controller untuk variables JSON.
-  final TextEditingController variablesController;
+  /// Map variables halaman saat ini.
+  final Map<String, dynamic> variables;
+
+  /// Callback saat variables berubah.
+  final ValueChanged<Map<String, dynamic>> onVariablesChanged;
 
   /// Callback saat slug diubah manual (mematikan auto-slug).
   final VoidCallback onSlugManualEdit;
@@ -22,7 +26,8 @@ class PageFormMain extends StatelessWidget {
     super.key,
     required this.nameController,
     required this.slugController,
-    required this.variablesController,
+    required this.variables,
+    required this.onVariablesChanged,
     required this.onSlugManualEdit,
   });
 
@@ -114,19 +119,9 @@ class PageFormMain extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: variablesController,
-              decoration: const InputDecoration(
-                hintText: '{\n  "hero_title": "",\n  "hero_subtitle": ""\n}',
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
-              maxLines: 15,
-              minLines: 8,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 13,
-              ),
+            PageVariablesTable(
+              variables: variables,
+              onChanged: onVariablesChanged,
             ),
           ],
         ),
