@@ -6,27 +6,13 @@ APP_NAME=vernon_cms_ui
 get:
 	flutter pub get
 
-## Run
+## Run (BASE_URL dikonfigurasi via .env)
 run:
 	flutter run -d chrome
 
-run-dev:
-	flutter run -d chrome --dart-define=BASE_URL=http://localhost:8080/api/v1
-
-run-staging:
-	flutter run -d chrome --dart-define=BASE_URL=https://staging-api.vernoncms.com/api/v1
-
-run-prod:
-	flutter run -d chrome --dart-define=BASE_URL=https://api.vernoncms.com/api/v1
-
-## Build
+## Build (copy .env yang sesuai sebelum build)
 build-web:
-	flutter build web --release \
-		--dart-define=BASE_URL=https://api.vernoncms.com/api/v1
-
-build-web-staging:
-	flutter build web --release \
-		--dart-define=BASE_URL=https://staging-api.vernoncms.com/api/v1
+	flutter build web --release
 
 ## Testing
 test:

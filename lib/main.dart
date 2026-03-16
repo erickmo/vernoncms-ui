@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 import 'core/di/injection.dart';
@@ -8,6 +9,9 @@ import 'core/constants/app_constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables dari .env
+  await dotenv.load(fileName: '.env');
 
   // Hilangkan # dari URL web
   setPathUrlStrategy();
