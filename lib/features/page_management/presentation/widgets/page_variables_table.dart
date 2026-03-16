@@ -205,14 +205,16 @@ class _PageVariablesTableState extends State<PageVariablesTable> {
           Expanded(
             child: TextFormField(
               initialValue: row.value,
-              decoration: const InputDecoration(
-                hintText: 'nilai',
-                hintStyle: TextStyle(
+              maxLines: null,
+              minLines: 1,
+              decoration: InputDecoration(
+                hintText: 'nilai (teks, angka, true/false, atau JSON)',
+                hintStyle: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textHint,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: AppDimensions.spacingS,
                   vertical: AppDimensions.spacingXS,
                 ),

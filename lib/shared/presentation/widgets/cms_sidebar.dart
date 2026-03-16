@@ -86,7 +86,7 @@ class CmsSidebar extends StatelessWidget {
                     AppConstants.appName,
                     style: const TextStyle(
                       color: AppColors.textPrimary,
-                      fontSize: 17,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.3,
                     ),

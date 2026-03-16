@@ -123,7 +123,14 @@ class CmsTopBar extends StatelessWidget {
           color: AppColors.textSecondary,
           iconSize: 22,
           tooltip: 'Notifikasi',
-          onPressed: () {},
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Notifikasi akan segera tersedia'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          },
         ),
       );
 
