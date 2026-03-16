@@ -47,8 +47,8 @@ class ContentFormCubit extends Cubit<ContentFormState> {
         emit(ContentFormState.error(failure.message));
         return false;
       },
-      (savedContent) {
-        emit(ContentFormState.saved(content: savedContent));
+      (_) {
+        emit(const ContentFormState.saved());
         return true;
       },
     );
@@ -65,8 +65,8 @@ class ContentFormCubit extends Cubit<ContentFormState> {
         emit(ContentFormState.error(failure.message));
         return false;
       },
-      (savedContent) {
-        emit(ContentFormState.saved(content: savedContent));
+      (_) {
+        emit(const ContentFormState.saved());
         return true;
       },
     );

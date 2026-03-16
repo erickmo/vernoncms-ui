@@ -4,53 +4,25 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
 
-/// Panel utama form halaman (kiri): Konten + Hero.
+/// Panel utama form halaman (kiri): Name, Slug, Variables JSON.
 class PageFormMain extends StatelessWidget {
-  /// Controller untuk judul halaman.
-  final TextEditingController titleController;
-
-  /// Controller untuk page key.
-  final TextEditingController pageKeyController;
+  /// Controller untuk nama halaman.
+  final TextEditingController nameController;
 
   /// Controller untuk slug.
   final TextEditingController slugController;
 
-  /// Controller untuk caption.
-  final TextEditingController captionController;
-
-  /// Controller untuk body/konten.
-  final TextEditingController bodyController;
-
-  /// Controller untuk hero title.
-  final TextEditingController heroTitleController;
-
-  /// Controller untuk hero subtitle.
-  final TextEditingController heroSubtitleController;
-
-  /// Controller untuk hero image URL.
-  final TextEditingController heroImageUrlController;
-
-  /// Controller untuk hero CTA text.
-  final TextEditingController heroCtaTextController;
-
-  /// Controller untuk hero CTA URL.
-  final TextEditingController heroCtaUrlController;
+  /// Controller untuk variables JSON.
+  final TextEditingController variablesController;
 
   /// Callback saat slug diubah manual (mematikan auto-slug).
   final VoidCallback onSlugManualEdit;
 
   const PageFormMain({
     super.key,
-    required this.titleController,
-    required this.pageKeyController,
+    required this.nameController,
     required this.slugController,
-    required this.captionController,
-    required this.bodyController,
-    required this.heroTitleController,
-    required this.heroSubtitleController,
-    required this.heroImageUrlController,
-    required this.heroCtaTextController,
-    required this.heroCtaUrlController,
+    required this.variablesController,
     required this.onSlugManualEdit,
   });
 
@@ -59,14 +31,14 @@ class PageFormMain extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildContentSection(),
+        _buildBasicSection(),
         const SizedBox(height: AppDimensions.spacingL),
-        _buildHeroSection(),
+        _buildVariablesSection(),
       ],
     );
   }
 
-  Widget _buildContentSection() {
+  Widget _buildBasicSection() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.spacingL),
@@ -83,30 +55,15 @@ class PageFormMain extends StatelessWidget {
             ),
             const SizedBox(height: AppDimensions.spacingM),
             TextFormField(
-              controller: titleController,
+              controller: nameController,
               decoration: const InputDecoration(
-                labelText: AppStrings.pageTitleLabel,
-                hintText: AppStrings.pageTitleHint,
+                labelText: AppStrings.pageNameLabel,
+                hintText: AppStrings.pageNameHint,
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return AppStrings.pageTitleRequired;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: pageKeyController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.pageKeyLabel,
-                hintText: AppStrings.pageKeyHint,
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return AppStrings.pageKeyRequired;
+                  return AppStrings.pageNameRequired;
                 }
                 return null;
               },
@@ -127,34 +84,13 @@ class PageFormMain extends StatelessWidget {
                 return null;
               },
             ),
-            const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: captionController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.pageCaptionLabel,
-                hintText: AppStrings.pageCaptionHint,
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: bodyController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.pageBodyLabel,
-                hintText: AppStrings.pageBodyHint,
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
-              maxLines: 10,
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeroSection() {
+  Widget _buildVariablesSection() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.spacingL),
@@ -162,66 +98,35 @@ class PageFormMain extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              AppStrings.pageTabHero,
+              AppStrings.pageVariablesLabel,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: heroTitleController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.pageHeroTitleLabel,
-                hintText: AppStrings.pageHeroTitleHint,
-                border: OutlineInputBorder(),
+            const SizedBox(height: AppDimensions.spacingS),
+            const Text(
+              AppStrings.pageVariablesHint,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppDimensions.spacingM),
             TextFormField(
-              controller: heroSubtitleController,
+              controller: variablesController,
               decoration: const InputDecoration(
-                labelText: AppStrings.pageHeroSubtitleLabel,
-                hintText: AppStrings.pageHeroSubtitleHint,
+                hintText: '{\n  "hero_title": "",\n  "hero_subtitle": ""\n}',
                 border: OutlineInputBorder(),
+                alignLabelWithHint: true,
               ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: heroImageUrlController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.pageHeroImageUrlLabel,
-                hintText: AppStrings.pageHeroImageUrlHint,
-                border: OutlineInputBorder(),
+              maxLines: 15,
+              minLines: 8,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 13,
               ),
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: heroCtaTextController,
-                    decoration: const InputDecoration(
-                      labelText: AppStrings.pageHeroCtaTextLabel,
-                      hintText: AppStrings.pageHeroCtaTextHint,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.spacingM),
-                Expanded(
-                  child: TextFormField(
-                    controller: heroCtaUrlController,
-                    decoration: const InputDecoration(
-                      labelText: AppStrings.pageHeroCtaUrlLabel,
-                      hintText: AppStrings.pageHeroCtaUrlHint,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ],
         ),

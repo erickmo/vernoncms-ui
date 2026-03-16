@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/utils/jwt_decoder.dart';
 import '../../../features/auth/data/datasources/auth_local_datasource.dart';
 
 /// Top bar CMS dengan judul halaman, nama user, dan avatar.
@@ -60,54 +61,75 @@ class CmsTopBar extends StatelessWidget {
         ),
       );
 
-  Widget _buildUserSection(BuildContext context) => PopupMenuButton<String>(
-        offset: const Offset(0, AppDimensions.appBarHeight - 8),
-        onSelected: (value) {
-          if (value == 'logout') {
-            _handleLogout(context);
-          }
-        },
-        itemBuilder: (context) => [
-          const PopupMenuItem(
-            value: 'logout',
-            child: Row(
-              children: [
-                Icon(Icons.logout, size: AppDimensions.iconM),
-                SizedBox(width: AppDimensions.spacingS),
-                Text(AppStrings.logout),
-              ],
+  Widget _buildUserSection(BuildContext context) {
+    final localDataSource = getIt<AuthLocalDataSource>();
+    final accessToken = localDataSource.getAccessToken();
+
+    String displayName = 'User';
+    String initial = 'U';
+
+    if (accessToken != null) {
+      final email = JwtDecoder.getEmail(accessToken);
+      final role = JwtDecoder.getRole(accessToken);
+      if (email != null && email.isNotEmpty) {
+        displayName = email;
+        initial = email[0].toUpperCase();
+      }
+      if (role != null) {
+        displayName = '$displayName ($role)';
+      }
+    }
+
+    return PopupMenuButton<String>(
+      offset: const Offset(0, AppDimensions.appBarHeight - 8),
+      onSelected: (value) {
+        if (value == 'logout') {
+          _handleLogout(context);
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'logout',
+          child: Row(
+            children: [
+              Icon(Icons.logout, size: AppDimensions.iconM),
+              SizedBox(width: AppDimensions.spacingS),
+              Text(AppStrings.logout),
+            ],
+          ),
+        ),
+      ],
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            displayName,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(width: AppDimensions.spacingS),
+          CircleAvatar(
+            radius: AppDimensions.avatarS / 2,
+            backgroundColor: AppColors.primary,
+            child: Text(
+              initial,
+              style: const TextStyle(
+                color: AppColors.surface,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          const SizedBox(width: AppDimensions.spacingXS),
+          const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
         ],
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Admin',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(width: AppDimensions.spacingS),
-            CircleAvatar(
-              radius: AppDimensions.avatarS / 2,
-              backgroundColor: AppColors.primary,
-              child: Text(
-                'A',
-                style: TextStyle(
-                  color: AppColors.surface,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            SizedBox(width: AppDimensions.spacingXS),
-            Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
-          ],
-        ),
-      );
+      ),
+    );
+  }
 
   void _handleLogout(BuildContext context) {
     final localDataSource = getIt<AuthLocalDataSource>();

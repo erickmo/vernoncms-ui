@@ -14,7 +14,6 @@ sealed class ContentListState with _$ContentListState {
     required List<Content> contents,
     @Default('') String searchQuery,
     @Default('') String statusFilter,
-    @Default('') String categoryFilter,
   }) = ContentListLoaded;
 
   /// Gagal memuat data.

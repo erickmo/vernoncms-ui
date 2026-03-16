@@ -5,7 +5,6 @@ import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/content_category.dart';
 import '../../domain/repositories/content_category_repository.dart';
 import '../datasources/content_category_remote_datasource.dart';
-import '../models/content_category_model.dart';
 
 /// Implementasi [ContentCategoryRepository].
 class ContentCategoryRepositoryImpl implements ContentCategoryRepository {
@@ -17,19 +16,15 @@ class ContentCategoryRepositoryImpl implements ContentCategoryRepository {
 
   @override
   Future<Either<Failure, List<ContentCategory>>> getCategories({
-    String? search,
-    String? parentId,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) async {
     try {
       final response = await _remoteDataSource.getCategories(
-        search: search,
-        parentId: parentId,
         page: page,
-        perPage: perPage,
+        limit: limit,
       );
-      return Right(response.map((e) => e.toEntity()).toList());
+      return Right(response.items.map((e) => e.toEntity()).toList());
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, statusCode: e.statusCode));
     }
@@ -46,45 +41,34 @@ class ContentCategoryRepositoryImpl implements ContentCategoryRepository {
   }
 
   @override
-  Future<Either<Failure, ContentCategory>> createCategory(
+  Future<Either<Failure, void>> createCategory(
     ContentCategory category,
   ) async {
     try {
-      final model = ContentCategoryModel.fromEntity(category);
-      final data = model.toJson();
-      // Hapus field read-only yang tidak perlu dikirim ke server.
-      data.remove('id');
-      data.remove('content_count');
-      data.remove('created_at');
-      data.remove('updated_at');
-      data.remove('parent_category_name');
+      final data = <String, dynamic>{
+        'name': category.name,
+        'slug': category.slug,
+      };
 
-      final response = await _remoteDataSource.createCategory(data);
-      return Right(response.toEntity());
+      await _remoteDataSource.createCategory(data);
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, statusCode: e.statusCode));
     }
   }
 
   @override
-  Future<Either<Failure, ContentCategory>> updateCategory(
+  Future<Either<Failure, void>> updateCategory(
     ContentCategory category,
   ) async {
     try {
-      final model = ContentCategoryModel.fromEntity(category);
-      final data = model.toJson();
-      // Hapus field read-only yang tidak perlu dikirim ke server.
-      data.remove('id');
-      data.remove('content_count');
-      data.remove('created_at');
-      data.remove('updated_at');
-      data.remove('parent_category_name');
+      final data = <String, dynamic>{
+        'name': category.name,
+        'slug': category.slug,
+      };
 
-      final response = await _remoteDataSource.updateCategory(
-        category.id,
-        data,
-      );
-      return Right(response.toEntity());
+      await _remoteDataSource.updateCategory(category.id, data);
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, statusCode: e.statusCode));
     }

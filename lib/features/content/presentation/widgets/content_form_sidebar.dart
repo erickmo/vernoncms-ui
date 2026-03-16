@@ -4,20 +4,21 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/content_category.dart';
+import '../../../page_management/domain/entities/page_entity.dart';
 
-/// Sidebar form konten (kanan): status, category, tags, SEO, settings.
+/// Sidebar form konten (kanan): status, page, category, metadata.
 class ContentFormSidebar extends StatelessWidget {
-  /// Status konten saat ini.
+  /// Status konten saat ini (read-only display).
   final String status;
 
-  /// Callback saat status berubah.
-  final ValueChanged<String> onStatusChanged;
+  /// ID halaman yang dipilih.
+  final String? pageId;
 
-  /// Visibility konten saat ini.
-  final String visibility;
+  /// Callback saat halaman berubah.
+  final ValueChanged<String?> onPageChanged;
 
-  /// Callback saat visibility berubah.
-  final ValueChanged<String> onVisibilityChanged;
+  /// Daftar halaman yang tersedia.
+  final List<PageEntity> pages;
 
   /// ID kategori yang dipilih.
   final String? categoryId;
@@ -28,95 +29,19 @@ class ContentFormSidebar extends StatelessWidget {
   /// Daftar kategori yang tersedia.
   final List<ContentCategory> categories;
 
-  /// Controller untuk tags.
-  final TextEditingController tagsController;
-
-  /// Controller untuk featured image URL.
-  final TextEditingController featuredImageUrlController;
-
-  /// Controller untuk featured image alt.
-  final TextEditingController featuredImageAltController;
-
-  /// Controller untuk meta title.
-  final TextEditingController metaTitleController;
-
-  /// Controller untuk meta description.
-  final TextEditingController metaDescriptionController;
-
-  /// Controller untuk meta keywords.
-  final TextEditingController metaKeywordsController;
-
-  /// Controller untuk OG title.
-  final TextEditingController ogTitleController;
-
-  /// Controller untuk OG description.
-  final TextEditingController ogDescriptionController;
-
-  /// Controller untuk OG image URL.
-  final TextEditingController ogImageUrlController;
-
-  /// Controller untuk template.
-  final TextEditingController templateController;
-
-  /// Apakah konten featured.
-  final bool isFeatured;
-
-  /// Callback saat featured berubah.
-  final ValueChanged<bool> onFeaturedChanged;
-
-  /// Apakah konten pinned.
-  final bool isPinned;
-
-  /// Callback saat pinned berubah.
-  final ValueChanged<bool> onPinnedChanged;
-
-  /// Apakah komentar diperbolehkan.
-  final bool allowComments;
-
-  /// Callback saat allow comments berubah.
-  final ValueChanged<bool> onAllowCommentsChanged;
-
-  /// Apakah noIndex aktif.
-  final bool noIndex;
-
-  /// Callback saat noIndex berubah.
-  final ValueChanged<bool> onNoIndexChanged;
-
-  /// Apakah noFollow aktif.
-  final bool noFollow;
-
-  /// Callback saat noFollow berubah.
-  final ValueChanged<bool> onNoFollowChanged;
+  /// Controller untuk metadata JSON.
+  final TextEditingController metadataController;
 
   const ContentFormSidebar({
     super.key,
     required this.status,
-    required this.onStatusChanged,
-    required this.visibility,
-    required this.onVisibilityChanged,
+    required this.pageId,
+    required this.onPageChanged,
+    required this.pages,
     required this.categoryId,
     required this.onCategoryChanged,
     required this.categories,
-    required this.tagsController,
-    required this.featuredImageUrlController,
-    required this.featuredImageAltController,
-    required this.metaTitleController,
-    required this.metaDescriptionController,
-    required this.metaKeywordsController,
-    required this.ogTitleController,
-    required this.ogDescriptionController,
-    required this.ogImageUrlController,
-    required this.templateController,
-    required this.isFeatured,
-    required this.onFeaturedChanged,
-    required this.isPinned,
-    required this.onPinnedChanged,
-    required this.allowComments,
-    required this.onAllowCommentsChanged,
-    required this.noIndex,
-    required this.onNoIndexChanged,
-    required this.noFollow,
-    required this.onNoFollowChanged,
+    required this.metadataController,
   });
 
   @override
@@ -124,30 +49,41 @@ class ContentFormSidebar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildPublishSection(),
+        _buildStatusSection(),
+        const SizedBox(height: AppDimensions.spacingM),
+        _buildPageSection(),
         const SizedBox(height: AppDimensions.spacingM),
         _buildCategorySection(),
         const SizedBox(height: AppDimensions.spacingM),
-        _buildTagsSection(),
-        const SizedBox(height: AppDimensions.spacingM),
-        _buildFeaturedImageSection(),
-        const SizedBox(height: AppDimensions.spacingM),
-        _buildSettingsSection(),
-        const SizedBox(height: AppDimensions.spacingM),
-        _buildSeoSection(),
+        _buildMetadataSection(),
       ],
     );
   }
 
-  Widget _buildPublishSection() {
+  Widget _buildStatusSection() {
+    final Color chipColor;
+    final String label;
+
+    switch (status) {
+      case 'published':
+        chipColor = AppColors.success;
+        label = AppStrings.contentStatusPublished;
+      case 'archived':
+        chipColor = AppColors.error;
+        label = AppStrings.contentStatusArchived;
+      default:
+        chipColor = AppColors.textHint;
+        label = AppStrings.contentStatusDraft;
+    }
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.spacingM),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              AppStrings.contentPublishSection,
+              AppStrings.contentStatus,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -155,54 +91,65 @@ class ContentFormSidebar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppDimensions.spacingM),
-            DropdownButtonFormField<String>(
-              initialValue: status,
-              decoration: const InputDecoration(
-                labelText: AppStrings.contentStatus,
-                border: OutlineInputBorder(),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.spacingS,
+                vertical: AppDimensions.spacingXS,
               ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'draft',
-                  child: Text(AppStrings.contentStatusDraft),
+              decoration: BoxDecoration(
+                color: chipColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusS),
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: chipColor,
                 ),
-                DropdownMenuItem(
-                  value: 'published',
-                  child: Text(AppStrings.contentStatusPublished),
-                ),
-                DropdownMenuItem(
-                  value: 'archived',
-                  child: Text(AppStrings.contentStatusArchived),
-                ),
-              ],
-              onChanged: (value) {
-                if (value != null) onStatusChanged(value);
-              },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPageSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.spacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              AppStrings.contentPageSection,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: AppDimensions.spacingM),
-            DropdownButtonFormField<String>(
-              initialValue: visibility,
+            DropdownButtonFormField<String?>(
+              initialValue: pageId,
               decoration: const InputDecoration(
-                labelText: AppStrings.contentVisibility,
+                labelText: AppStrings.contentPage,
                 border: OutlineInputBorder(),
               ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'public',
-                  child: Text(AppStrings.contentVisibilityPublic),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text(AppStrings.contentNoPage),
                 ),
-                DropdownMenuItem(
-                  value: 'private',
-                  child: Text(AppStrings.contentVisibilityPrivate),
-                ),
-                DropdownMenuItem(
-                  value: 'password_protected',
-                  child: Text(AppStrings.contentVisibilityPasswordProtected),
+                ...pages.map(
+                  (p) => DropdownMenuItem<String?>(
+                    value: p.id,
+                    child: Text(p.name),
+                  ),
                 ),
               ],
-              onChanged: (value) {
-                if (value != null) onVisibilityChanged(value);
-              },
+              onChanged: onPageChanged,
             ),
           ],
         ),
@@ -252,84 +199,15 @@ class ContentFormSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildTagsSection() {
+  Widget _buildMetadataSection() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.spacingM),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              AppStrings.contentTagsSection,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: tagsController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.contentTags,
-                hintText: AppStrings.contentTagsHint,
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeaturedImageSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              AppStrings.contentFeaturedImage,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: featuredImageUrlController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.contentFeaturedImageUrl,
-                hintText: AppStrings.contentFeaturedImageUrlHint,
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: AppDimensions.spacingM),
-            TextFormField(
-              controller: featuredImageAltController,
-              decoration: const InputDecoration(
-                labelText: AppStrings.contentFeaturedImageAlt,
-                hintText: AppStrings.contentFeaturedImageAltHint,
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettingsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              AppStrings.contentSettingsSection,
+              AppStrings.contentMetadataSection,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -337,138 +215,29 @@ class ContentFormSidebar extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppDimensions.spacingS),
-            SwitchListTile(
-              title: const Text(AppStrings.contentFeatured),
-              value: isFeatured,
-              onChanged: onFeaturedChanged,
-              contentPadding: EdgeInsets.zero,
+            const Text(
+              AppStrings.contentMetadataHint,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
             ),
-            SwitchListTile(
-              title: const Text(AppStrings.contentPinned),
-              value: isPinned,
-              onChanged: onPinnedChanged,
-              contentPadding: EdgeInsets.zero,
-            ),
-            SwitchListTile(
-              title: const Text(AppStrings.contentAllowComments),
-              value: allowComments,
-              onChanged: onAllowCommentsChanged,
-              contentPadding: EdgeInsets.zero,
-            ),
-            const SizedBox(height: AppDimensions.spacingS),
+            const SizedBox(height: AppDimensions.spacingM),
             TextFormField(
-              controller: templateController,
+              controller: metadataController,
               decoration: const InputDecoration(
-                labelText: AppStrings.contentTemplate,
-                hintText: AppStrings.contentTemplateHint,
+                hintText: '{\n  "seo_title": "",\n  "tags": []\n}',
                 border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+              maxLines: 8,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 13,
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSeoSection() {
-    return Card(
-      child: ExpansionTile(
-        title: const Text(
-          AppStrings.seoSection,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        tilePadding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.spacingM,
-        ),
-        childrenPadding: const EdgeInsets.fromLTRB(
-          AppDimensions.spacingM,
-          0,
-          AppDimensions.spacingM,
-          AppDimensions.spacingM,
-        ),
-        children: [
-          TextFormField(
-            controller: metaTitleController,
-            decoration: const InputDecoration(
-              labelText: AppStrings.metaTitle,
-              hintText: AppStrings.metaTitleHint,
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          TextFormField(
-            controller: metaDescriptionController,
-            decoration: const InputDecoration(
-              labelText: AppStrings.metaDescriptionLabel,
-              hintText: AppStrings.metaDescriptionHint,
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          TextFormField(
-            controller: metaKeywordsController,
-            decoration: const InputDecoration(
-              labelText: AppStrings.contentMetaKeywords,
-              hintText: AppStrings.contentMetaKeywordsHint,
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingL),
-          const Text(
-            AppStrings.contentOgSection,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          TextFormField(
-            controller: ogTitleController,
-            decoration: const InputDecoration(
-              labelText: AppStrings.contentOgTitle,
-              hintText: AppStrings.contentOgTitleHint,
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          TextFormField(
-            controller: ogDescriptionController,
-            decoration: const InputDecoration(
-              labelText: AppStrings.contentOgDescription,
-              hintText: AppStrings.contentOgDescriptionHint,
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          TextFormField(
-            controller: ogImageUrlController,
-            decoration: const InputDecoration(
-              labelText: AppStrings.contentOgImageUrl,
-              hintText: AppStrings.contentOgImageUrlHint,
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingM),
-          SwitchListTile(
-            title: const Text(AppStrings.contentNoIndex),
-            value: noIndex,
-            onChanged: onNoIndexChanged,
-            contentPadding: EdgeInsets.zero,
-          ),
-          SwitchListTile(
-            title: const Text(AppStrings.contentNoFollow),
-            value: noFollow,
-            onChanged: onNoFollowChanged,
-            contentPadding: EdgeInsets.zero,
-          ),
-        ],
       ),
     );
   }

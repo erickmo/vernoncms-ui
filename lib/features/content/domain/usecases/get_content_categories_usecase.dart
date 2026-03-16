@@ -12,16 +12,12 @@ class GetContentCategoriesUseCase {
 
   /// Returns [Right(List<ContentCategory>)] jika berhasil.
   Future<Either<Failure, List<ContentCategory>>> call({
-    String? search,
-    String? parentId,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) {
     return _repository.getCategories(
-      search: search,
-      parentId: parentId,
       page: page,
-      perPage: perPage,
+      limit: limit,
     );
   }
 }

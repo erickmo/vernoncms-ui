@@ -12,7 +12,6 @@ sealed class ContentCategoryState with _$ContentCategoryState {
   /// Data berhasil dimuat.
   const factory ContentCategoryState.loaded({
     required List<ContentCategory> categories,
-    @Default('') String searchQuery,
   }) = ContentCategoryLoaded;
 
   /// Gagal memuat data.

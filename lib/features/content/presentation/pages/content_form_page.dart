@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,8 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/content.dart';
 import '../../domain/entities/content_category.dart';
+import '../../../page_management/domain/entities/page_entity.dart';
+import '../../../page_management/domain/usecases/get_pages_usecase.dart';
 import '../cubit/content_category_cubit.dart';
 import '../cubit/content_form_cubit.dart';
 import '../widgets/content_form_main.dart';
@@ -61,27 +65,16 @@ class _ContentFormViewState extends State<_ContentFormView> {
   late final TextEditingController _bodyController;
 
   // Sidebar fields
-  late final TextEditingController _tagsController;
-  late final TextEditingController _featuredImageUrlController;
-  late final TextEditingController _featuredImageAltController;
-  late final TextEditingController _metaTitleController;
-  late final TextEditingController _metaDescriptionController;
-  late final TextEditingController _metaKeywordsController;
-  late final TextEditingController _ogTitleController;
-  late final TextEditingController _ogDescriptionController;
-  late final TextEditingController _ogImageUrlController;
-  late final TextEditingController _templateController;
+  late final TextEditingController _metadataController;
 
   String _status = 'draft';
-  String _visibility = 'public';
+  String? _pageId;
   String? _categoryId;
-  bool _isFeatured = false;
-  bool _isPinned = false;
-  bool _allowComments = true;
-  bool _noIndex = false;
-  bool _noFollow = false;
   bool _autoSlug = true;
   bool _initialized = false;
+
+  // Pages loaded from API
+  List<PageEntity> _pages = [];
 
   bool get _isEditing => widget.contentId != null;
 
@@ -92,22 +85,35 @@ class _ContentFormViewState extends State<_ContentFormView> {
     _slugController = TextEditingController();
     _excerptController = TextEditingController();
     _bodyController = TextEditingController();
-    _tagsController = TextEditingController();
-    _featuredImageUrlController = TextEditingController();
-    _featuredImageAltController = TextEditingController();
-    _metaTitleController = TextEditingController();
-    _metaDescriptionController = TextEditingController();
-    _metaKeywordsController = TextEditingController();
-    _ogTitleController = TextEditingController();
-    _ogDescriptionController = TextEditingController();
-    _ogImageUrlController = TextEditingController();
-    _templateController = TextEditingController();
+    _metadataController = TextEditingController(text: '{}');
 
     _titleController.addListener(_onTitleChanged);
 
     // Jika create, langsung set initialized.
     if (!_isEditing) {
       _initialized = true;
+    }
+
+    // Load pages
+    _loadPages();
+  }
+
+  Future<void> _loadPages() async {
+    try {
+      final getPagesUseCase = getIt<GetPagesUseCase>();
+      final result = await getPagesUseCase();
+      result.fold(
+        (_) {},
+        (pages) {
+          if (mounted) {
+            setState(() {
+              _pages = pages;
+            });
+          }
+        },
+      );
+    } catch (_) {
+      // Ignore page loading errors
     }
   }
 
@@ -117,16 +123,7 @@ class _ContentFormViewState extends State<_ContentFormView> {
     _slugController.dispose();
     _excerptController.dispose();
     _bodyController.dispose();
-    _tagsController.dispose();
-    _featuredImageUrlController.dispose();
-    _featuredImageAltController.dispose();
-    _metaTitleController.dispose();
-    _metaDescriptionController.dispose();
-    _metaKeywordsController.dispose();
-    _ogTitleController.dispose();
-    _ogDescriptionController.dispose();
-    _ogImageUrlController.dispose();
-    _templateController.dispose();
+    _metadataController.dispose();
     super.dispose();
   }
 
@@ -150,105 +147,74 @@ class _ContentFormViewState extends State<_ContentFormView> {
     _slugController.text = content.slug;
     _excerptController.text = content.excerpt ?? '';
     _bodyController.text = content.body ?? '';
-    _tagsController.text = content.tags.join(', ');
-    _featuredImageUrlController.text = content.featuredImageUrl ?? '';
-    _featuredImageAltController.text = content.featuredImageAlt ?? '';
-    _metaTitleController.text = content.metaTitle ?? '';
-    _metaDescriptionController.text = content.metaDescription ?? '';
-    _metaKeywordsController.text = content.metaKeywords.join(', ');
-    _ogTitleController.text = content.ogTitle ?? '';
-    _ogDescriptionController.text = content.ogDescription ?? '';
-    _ogImageUrlController.text = content.ogImageUrl ?? '';
-    _templateController.text = content.template ?? '';
+
+    // Prettify metadata JSON.
+    try {
+      const encoder = JsonEncoder.withIndent('  ');
+      _metadataController.text = encoder.convert(content.metadata);
+    } catch (_) {
+      _metadataController.text = '{}';
+    }
+
     _status = content.status;
-    _visibility = content.visibility;
+    _pageId = content.pageId;
     _categoryId = content.categoryId;
-    _isFeatured = content.isFeatured;
-    _isPinned = content.isPinned;
-    _allowComments = content.allowComments;
-    _noIndex = content.noIndex;
-    _noFollow = content.noFollow;
     _autoSlug = false;
-  }
-
-  List<String> _parseCommaSeparated(String text) {
-    if (text.trim().isEmpty) return [];
-    return text
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-  }
-
-  Content _buildContentEntity({Content? existing}) {
-    final now = DateTime.now();
-    return Content(
-      id: existing?.id ?? '',
-      title: _titleController.text.trim(),
-      slug: _slugController.text.trim(),
-      excerpt: _excerptController.text.trim().isEmpty
-          ? null
-          : _excerptController.text.trim(),
-      body: _bodyController.text.trim().isEmpty
-          ? null
-          : _bodyController.text.trim(),
-      status: _status,
-      visibility: _visibility,
-      isFeatured: _isFeatured,
-      isPinned: _isPinned,
-      authorId: existing?.authorId,
-      authorName: existing?.authorName,
-      categoryId: _categoryId,
-      categoryName: existing?.categoryName,
-      tags: _parseCommaSeparated(_tagsController.text),
-      featuredImageUrl: _featuredImageUrlController.text.trim().isEmpty
-          ? null
-          : _featuredImageUrlController.text.trim(),
-      featuredImageAlt: _featuredImageAltController.text.trim().isEmpty
-          ? null
-          : _featuredImageAltController.text.trim(),
-      metaTitle: _metaTitleController.text.trim().isEmpty
-          ? null
-          : _metaTitleController.text.trim(),
-      metaDescription: _metaDescriptionController.text.trim().isEmpty
-          ? null
-          : _metaDescriptionController.text.trim(),
-      metaKeywords: _parseCommaSeparated(_metaKeywordsController.text),
-      ogTitle: _ogTitleController.text.trim().isEmpty
-          ? null
-          : _ogTitleController.text.trim(),
-      ogDescription: _ogDescriptionController.text.trim().isEmpty
-          ? null
-          : _ogDescriptionController.text.trim(),
-      ogImageUrl: _ogImageUrlController.text.trim().isEmpty
-          ? null
-          : _ogImageUrlController.text.trim(),
-      noIndex: _noIndex,
-      noFollow: _noFollow,
-      allowComments: _allowComments,
-      template: _templateController.text.trim().isEmpty
-          ? null
-          : _templateController.text.trim(),
-      readingTimeMinutes: existing?.readingTimeMinutes,
-      version: existing?.version ?? 1,
-      publishedAt: _status == 'published'
-          ? (existing?.publishedAt ?? now)
-          : existing?.publishedAt,
-      scheduledAt: existing?.scheduledAt,
-      createdAt: existing?.createdAt ?? now,
-      updatedAt: now,
-    );
   }
 
   Future<void> _onSave() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Parse metadata JSON.
+    Map<String, dynamic> metadata;
+    try {
+      final parsed = json.decode(_metadataController.text.trim());
+      if (parsed is Map<String, dynamic>) {
+        metadata = parsed;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.contentMetadataInvalid),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.contentMetadataInvalid),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
 
     final cubit = context.read<ContentFormCubit>();
     final state = cubit.state;
     final existing =
         state is ContentFormLoaded ? state.content : null;
 
-    final content = _buildContentEntity(existing: existing);
+    final now = DateTime.now();
+    final content = Content(
+      id: existing?.id ?? '',
+      title: _titleController.text.trim(),
+      slug: _slugController.text.trim(),
+      body: _bodyController.text.trim().isEmpty
+          ? null
+          : _bodyController.text.trim(),
+      excerpt: _excerptController.text.trim().isEmpty
+          ? null
+          : _excerptController.text.trim(),
+      status: _status,
+      pageId: _pageId,
+      categoryId: _categoryId,
+      authorId: existing?.authorId,
+      metadata: metadata,
+      publishedAt: existing?.publishedAt,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+    );
 
     final success = _isEditing
         ? await cubit.updateContent(content)
@@ -281,7 +247,7 @@ class _ContentFormViewState extends State<_ContentFormView> {
             return _buildForm(context);
           },
           saving: () => _buildForm(context, isSaving: true),
-          saved: (_) => _buildForm(context),
+          saved: () => _buildForm(context),
           error: (message) => _buildForm(context),
         );
       },
@@ -296,7 +262,7 @@ class _ContentFormViewState extends State<_ContentFormView> {
           backgroundColor: AppColors.error,
         ),
       ),
-      saved: (_) => ScaffoldMessenger.of(context).showSnackBar(
+      saved: () => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             _isEditing
@@ -366,34 +332,20 @@ class _ContentFormViewState extends State<_ContentFormView> {
         ),
         Row(
           children: [
-            OutlinedButton(
-              onPressed: isSaving
-                  ? null
-                  : () {
-                      setState(() {
-                        _status = 'draft';
-                      });
-                      _onSave();
-                    },
-              child: const Text(AppStrings.contentSaveAsDraft),
+            TextButton(
+              onPressed: isSaving ? null : () => context.go('/content'),
+              child: const Text(AppStrings.cancel),
             ),
             const SizedBox(width: AppDimensions.spacingS),
             ElevatedButton(
-              onPressed: isSaving
-                  ? null
-                  : () {
-                      setState(() {
-                        _status = 'published';
-                      });
-                      _onSave();
-                    },
+              onPressed: isSaving ? null : _onSave,
               child: isSaving
                   ? const SizedBox(
                       width: AppDimensions.iconS,
                       height: AppDimensions.iconS,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text(AppStrings.contentPublish),
+                  : const Text(AppStrings.save),
             ),
           ],
         ),
@@ -420,37 +372,15 @@ class _ContentFormViewState extends State<_ContentFormView> {
           flex: 1,
           child: ContentFormSidebar(
             status: _status,
-            onStatusChanged: (value) => setState(() => _status = value),
-            visibility: _visibility,
-            onVisibilityChanged: (value) =>
-                setState(() => _visibility = value),
+            pageId: _pageId,
+            onPageChanged: (value) =>
+                setState(() => _pageId = value),
+            pages: _pages,
             categoryId: _categoryId,
             onCategoryChanged: (value) =>
                 setState(() => _categoryId = value),
             categories: categories,
-            tagsController: _tagsController,
-            featuredImageUrlController: _featuredImageUrlController,
-            featuredImageAltController: _featuredImageAltController,
-            metaTitleController: _metaTitleController,
-            metaDescriptionController: _metaDescriptionController,
-            metaKeywordsController: _metaKeywordsController,
-            ogTitleController: _ogTitleController,
-            ogDescriptionController: _ogDescriptionController,
-            ogImageUrlController: _ogImageUrlController,
-            templateController: _templateController,
-            isFeatured: _isFeatured,
-            onFeaturedChanged: (value) =>
-                setState(() => _isFeatured = value),
-            isPinned: _isPinned,
-            onPinnedChanged: (value) => setState(() => _isPinned = value),
-            allowComments: _allowComments,
-            onAllowCommentsChanged: (value) =>
-                setState(() => _allowComments = value),
-            noIndex: _noIndex,
-            onNoIndexChanged: (value) => setState(() => _noIndex = value),
-            noFollow: _noFollow,
-            onNoFollowChanged: (value) =>
-                setState(() => _noFollow = value),
+            metadataController: _metadataController,
           ),
         ),
       ],
@@ -471,37 +401,15 @@ class _ContentFormViewState extends State<_ContentFormView> {
         const SizedBox(height: AppDimensions.spacingL),
         ContentFormSidebar(
           status: _status,
-          onStatusChanged: (value) => setState(() => _status = value),
-          visibility: _visibility,
-          onVisibilityChanged: (value) =>
-              setState(() => _visibility = value),
+          pageId: _pageId,
+          onPageChanged: (value) =>
+              setState(() => _pageId = value),
+          pages: _pages,
           categoryId: _categoryId,
           onCategoryChanged: (value) =>
               setState(() => _categoryId = value),
           categories: categories,
-          tagsController: _tagsController,
-          featuredImageUrlController: _featuredImageUrlController,
-          featuredImageAltController: _featuredImageAltController,
-          metaTitleController: _metaTitleController,
-          metaDescriptionController: _metaDescriptionController,
-          metaKeywordsController: _metaKeywordsController,
-          ogTitleController: _ogTitleController,
-          ogDescriptionController: _ogDescriptionController,
-          ogImageUrlController: _ogImageUrlController,
-          templateController: _templateController,
-          isFeatured: _isFeatured,
-          onFeaturedChanged: (value) =>
-              setState(() => _isFeatured = value),
-          isPinned: _isPinned,
-          onPinnedChanged: (value) => setState(() => _isPinned = value),
-          allowComments: _allowComments,
-          onAllowCommentsChanged: (value) =>
-              setState(() => _allowComments = value),
-          noIndex: _noIndex,
-          onNoIndexChanged: (value) => setState(() => _noIndex = value),
-          noFollow: _noFollow,
-          onNoFollowChanged: (value) =>
-              setState(() => _noFollow = value),
+          metadataController: _metadataController,
         ),
       ],
     );

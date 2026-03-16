@@ -7,24 +7,18 @@ import '../entities/content_category.dart';
 abstract class ContentCategoryRepository {
   /// Ambil daftar kategori konten.
   Future<Either<Failure, List<ContentCategory>>> getCategories({
-    String? search,
-    String? parentId,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   });
 
   /// Ambil detail kategori berdasarkan [id].
   Future<Either<Failure, ContentCategory>> getCategoryById(String id);
 
   /// Buat kategori baru.
-  Future<Either<Failure, ContentCategory>> createCategory(
-    ContentCategory category,
-  );
+  Future<Either<Failure, void>> createCategory(ContentCategory category);
 
   /// Perbarui kategori yang sudah ada.
-  Future<Either<Failure, ContentCategory>> updateCategory(
-    ContentCategory category,
-  );
+  Future<Either<Failure, void>> updateCategory(ContentCategory category);
 
   /// Hapus kategori berdasarkan [id].
   Future<Either<Failure, void>> deleteCategory(String id);

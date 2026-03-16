@@ -1,19 +1,18 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/paginated_response.dart';
 import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../models/content_category_model.dart';
 
 /// Datasource remote untuk kategori konten.
 abstract class ContentCategoryRemoteDataSource {
-  /// Ambil daftar kategori konten.
+  /// Ambil daftar kategori konten dengan pagination.
   ///
   /// Throws [ServerException] jika gagal.
-  Future<List<ContentCategoryModel>> getCategories({
-    String? search,
-    String? parentId,
+  Future<PaginatedResponse<ContentCategoryModel>> getCategories({
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   });
 
   /// Ambil detail kategori berdasarkan [id].
@@ -24,15 +23,12 @@ abstract class ContentCategoryRemoteDataSource {
   /// Buat kategori baru.
   ///
   /// Throws [ServerException] jika gagal.
-  Future<ContentCategoryModel> createCategory(Map<String, dynamic> data);
+  Future<void> createCategory(Map<String, dynamic> data);
 
   /// Perbarui kategori yang sudah ada.
   ///
   /// Throws [ServerException] jika gagal.
-  Future<ContentCategoryModel> updateCategory(
-    String id,
-    Map<String, dynamic> data,
-  );
+  Future<void> updateCategory(String id, Map<String, dynamic> data);
 
   /// Hapus kategori berdasarkan [id].
   ///
@@ -48,33 +44,23 @@ class ContentCategoryRemoteDataSourceImpl
   const ContentCategoryRemoteDataSourceImpl(this._apiClient);
 
   @override
-  Future<List<ContentCategoryModel>> getCategories({
-    String? search,
-    String? parentId,
+  Future<PaginatedResponse<ContentCategoryModel>> getCategories({
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) async {
     try {
       final queryParameters = <String, dynamic>{
         'page': page,
-        'per_page': perPage,
+        'limit': limit,
       };
-      if (search != null && search.isNotEmpty) {
-        queryParameters['search'] = search;
-      }
-      if (parentId != null && parentId.isNotEmpty) {
-        queryParameters['parent_id'] = parentId;
-      }
 
       final response = await _apiClient.dio.get(
-        '/api/content-categories',
+        '/api/v1/content-categories',
         queryParameters: queryParameters,
       );
 
-      final list = response.data as List<dynamic>;
-      return list
-          .map((e) => ContentCategoryModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final data = response.data['data'] as Map<String, dynamic>;
+      return PaginatedResponse.fromJson(data, ContentCategoryModel.fromJson);
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -87,10 +73,24 @@ class ContentCategoryRemoteDataSourceImpl
   Future<ContentCategoryModel> getCategoryById(String id) async {
     try {
       final response = await _apiClient.dio.get(
-        '/api/content-categories/$id',
+        '/api/v1/content-categories/$id',
       );
-      return ContentCategoryModel.fromJson(
-        response.data as Map<String, dynamic>,
+      final data = response.data['data'] as Map<String, dynamic>;
+      return ContentCategoryModel.fromJson(data);
+    } on DioException catch (e) {
+      throw ServerException(
+        _extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
+      );
+    }
+  }
+
+  @override
+  Future<void> createCategory(Map<String, dynamic> data) async {
+    try {
+      await _apiClient.dio.post(
+        '/api/v1/content-categories',
+        data: data,
       );
     } on DioException catch (e) {
       throw ServerException(
@@ -101,37 +101,11 @@ class ContentCategoryRemoteDataSourceImpl
   }
 
   @override
-  Future<ContentCategoryModel> createCategory(
-    Map<String, dynamic> data,
-  ) async {
+  Future<void> updateCategory(String id, Map<String, dynamic> data) async {
     try {
-      final response = await _apiClient.dio.post(
-        '/api/content-categories',
+      await _apiClient.dio.put(
+        '/api/v1/content-categories/$id',
         data: data,
-      );
-      return ContentCategoryModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      throw ServerException(
-        _extractErrorMessage(e),
-        statusCode: e.response?.statusCode,
-      );
-    }
-  }
-
-  @override
-  Future<ContentCategoryModel> updateCategory(
-    String id,
-    Map<String, dynamic> data,
-  ) async {
-    try {
-      final response = await _apiClient.dio.put(
-        '/api/content-categories/$id',
-        data: data,
-      );
-      return ContentCategoryModel.fromJson(
-        response.data as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw ServerException(
@@ -144,7 +118,7 @@ class ContentCategoryRemoteDataSourceImpl
   @override
   Future<void> deleteCategory(String id) async {
     try {
-      await _apiClient.dio.delete('/api/content-categories/$id');
+      await _apiClient.dio.delete('/api/v1/content-categories/$id');
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -156,8 +130,8 @@ class ContentCategoryRemoteDataSourceImpl
   String _extractErrorMessage(DioException e) {
     final data = e.response?.data;
     if (data is Map<String, dynamic>) {
-      return data['message'] as String? ??
-          data['error'] as String? ??
+      return data['error'] as String? ??
+          data['message'] as String? ??
           'Terjadi kesalahan pada server';
     }
     return e.message ?? 'Terjadi kesalahan pada server';

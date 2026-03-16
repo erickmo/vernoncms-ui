@@ -14,16 +14,14 @@ class GetUsersUseCase {
   Future<Either<Failure, List<CmsUser>>> call({
     String? search,
     String? role,
-    bool? isActive,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) {
     return _repository.getUsers(
       search: search,
       role: role,
-      isActive: isActive,
       page: page,
-      perPage: perPage,
+      limit: limit,
     );
   }
 }

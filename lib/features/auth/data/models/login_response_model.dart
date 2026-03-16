@@ -5,6 +5,9 @@ import '../../domain/entities/auth_token.dart';
 part 'login_response_model.g.dart';
 
 /// Model response dari API login.
+///
+/// Response API dibungkus dalam `{ "data": { ... } }`.
+/// Model ini merepresentasikan isi dari field `data`.
 @JsonSerializable()
 class LoginResponseModel {
   /// JWT access token.
@@ -15,14 +18,14 @@ class LoginResponseModel {
   @JsonKey(name: 'refresh_token')
   final String refreshToken;
 
-  /// Waktu expired token dalam detik.
-  @JsonKey(name: 'expires_in')
-  final int expiresIn;
+  /// Waktu expired token sebagai unix timestamp (detik).
+  @JsonKey(name: 'expires_at')
+  final int expiresAt;
 
   const LoginResponseModel({
     required this.accessToken,
     required this.refreshToken,
-    required this.expiresIn,
+    required this.expiresAt,
   });
 
   /// Parse dari JSON map.
@@ -33,6 +36,6 @@ class LoginResponseModel {
   AuthToken toEntity() => AuthToken(
         accessToken: accessToken,
         refreshToken: refreshToken,
-        expiresIn: expiresIn,
+        expiresAt: expiresAt,
       );
 }

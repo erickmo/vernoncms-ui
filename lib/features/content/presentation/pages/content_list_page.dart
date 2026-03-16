@@ -7,7 +7,6 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/content.dart';
-import '../cubit/content_category_cubit.dart';
 import '../cubit/content_list_cubit.dart';
 import '../widgets/content_table.dart';
 import '../widgets/delete_confirmation_dialog.dart';
@@ -18,15 +17,8 @@ class ContentListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) => getIt<ContentListCubit>()..loadContents(),
-        ),
-        BlocProvider(
-          create: (_) => getIt<ContentCategoryCubit>()..loadCategories(),
-        ),
-      ],
+    return BlocProvider(
+      create: (_) => getIt<ContentListCubit>()..loadContents(),
       child: const _ContentListView(),
     );
   }
@@ -42,7 +34,6 @@ class _ContentListView extends StatefulWidget {
 class _ContentListViewState extends State<_ContentListView> {
   final _searchController = TextEditingController();
   String _statusFilter = '';
-  String _categoryFilter = '';
 
   @override
   void dispose() {
@@ -57,7 +48,7 @@ class _ContentListViewState extends State<_ContentListView> {
       builder: (context, state) => state.when(
         initial: () => const SizedBox.shrink(),
         loading: () => const Center(child: CircularProgressIndicator()),
-        loaded: (contents, searchQuery, statusFilter, categoryFilter) =>
+        loaded: (contents, searchQuery, statusFilter) =>
             _buildContent(context, contents),
         error: (message) => _buildError(context, message),
       ),
@@ -89,6 +80,8 @@ class _ContentListViewState extends State<_ContentListView> {
             contents: contents,
             onEdit: (content) => context.go('/content/${content.id}/edit'),
             onDelete: (content) => _showDeleteDialog(context, content),
+            onPublish: (content) =>
+                context.read<ContentListCubit>().publishContent(content.id),
           ),
         ],
       ),
@@ -176,41 +169,6 @@ class _ContentListViewState extends State<_ContentListView> {
             },
           ),
         ),
-        SizedBox(
-          width: 220,
-          child: BlocBuilder<ContentCategoryCubit, ContentCategoryState>(
-            builder: (context, state) {
-              final categories = state is ContentCategoryLoaded
-                  ? state.categories
-                  : [];
-              return DropdownButtonFormField<String>(
-                initialValue: _categoryFilter.isEmpty ? null : _categoryFilter,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.contentCategory,
-                  border: OutlineInputBorder(),
-                ),
-                items: [
-                  const DropdownMenuItem<String>(
-                    value: null,
-                    child: Text(AppStrings.contentAllCategories),
-                  ),
-                  ...categories.map(
-                    (c) => DropdownMenuItem<String>(
-                      value: c.id,
-                      child: Text(c.name),
-                    ),
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _categoryFilter = value ?? '';
-                  });
-                  _applyFilters(context);
-                },
-              );
-            },
-          ),
-        ),
       ],
     );
   }
@@ -220,7 +178,6 @@ class _ContentListViewState extends State<_ContentListView> {
     context.read<ContentListCubit>().loadContents(
           search: search.isNotEmpty ? search : null,
           status: _statusFilter.isNotEmpty ? _statusFilter : null,
-          categoryId: _categoryFilter.isNotEmpty ? _categoryFilter : null,
         );
   }
 

@@ -14,7 +14,6 @@ sealed class UserListState with _$UserListState {
     required List<CmsUser> users,
     @Default('') String searchQuery,
     @Default('') String roleFilter,
-    @Default('') String statusFilter,
   }) = UserListLoaded;
 
   /// Gagal memuat data.

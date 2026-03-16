@@ -8,15 +8,15 @@ class AuthToken extends Equatable {
   /// JWT refresh token.
   final String refreshToken;
 
-  /// Waktu expired token dalam detik.
-  final int expiresIn;
+  /// Waktu expired token sebagai unix timestamp (detik).
+  final int expiresAt;
 
   const AuthToken({
     required this.accessToken,
     required this.refreshToken,
-    required this.expiresIn,
+    required this.expiresAt,
   });
 
   @override
-  List<Object> get props => [accessToken, refreshToken, expiresIn];
+  List<Object> get props => [accessToken, refreshToken, expiresAt];
 }

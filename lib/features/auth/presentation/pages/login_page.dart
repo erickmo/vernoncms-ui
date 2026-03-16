@@ -17,7 +17,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<LoginCubit>()..loadRememberedUsername(),
+      create: (_) => getIt<LoginCubit>()..loadRememberedEmail(),
       child: const _LoginView(),
     );
   }
@@ -98,20 +98,53 @@ class _LoginView extends StatelessWidget {
     return BlocBuilder<LoginCubit, LoginState>(
       buildWhen: (previous, current) => current is LoginInitial,
       builder: (context, state) {
-        final initialUsername =
-            state is LoginInitial ? state.rememberedUsername : '';
+        final initialEmail =
+            state is LoginInitial ? state.rememberedEmail : '';
         final initialRememberMe =
             state is LoginInitial ? state.rememberMe : false;
+        final successMessage =
+            state is LoginInitial ? state.successMessage : '';
 
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(AppDimensions.spacingL),
-            child: LoginForm(
-              initialUsername: initialUsername,
-              initialRememberMe: initialRememberMe,
-              onForgotPassword: () => context.go('/forgot-password'),
+        return Column(
+          children: [
+            if (successMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppDimensions.spacingM),
+                child: Container(
+                  padding: const EdgeInsets.all(AppDimensions.spacingS),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.success.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle,
+                          color: AppColors.success, size: 20),
+                      const SizedBox(width: AppDimensions.spacingS),
+                      Expanded(
+                        child: Text(
+                          successMessage,
+                          style: const TextStyle(color: AppColors.success),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimensions.spacingL),
+                child: LoginForm(
+                  initialEmail: initialEmail,
+                  initialRememberMe: initialRememberMe,
+                  onRegister: () => context.go('/register'),
+                ),
+              ),
             ),
-          ),
+          ],
         );
       },
     );

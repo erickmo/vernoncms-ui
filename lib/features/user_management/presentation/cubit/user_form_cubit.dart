@@ -37,18 +37,20 @@ class UserFormCubit extends Cubit<UserFormState> {
   }
 
   /// Membuat user baru.
-  Future<bool> createUser(CmsUser user, {required String password}) async {
+  Future<bool> createUser(CmsUser user,
+      {required String passwordHash}) async {
     emit(const UserFormState.saving());
 
-    final result = await _createUserUseCase(user, password: password);
+    final result =
+        await _createUserUseCase(user, passwordHash: passwordHash);
 
     return result.fold(
       (failure) {
         emit(UserFormState.error(failure.message));
         return false;
       },
-      (savedUser) {
-        emit(UserFormState.saved(user: savedUser));
+      (_) {
+        emit(const UserFormState.saved());
         return true;
       },
     );
@@ -65,8 +67,8 @@ class UserFormCubit extends Cubit<UserFormState> {
         emit(UserFormState.error(failure.message));
         return false;
       },
-      (savedUser) {
-        emit(UserFormState.saved(user: savedUser));
+      (_) {
+        emit(const UserFormState.saved());
         return true;
       },
     );

@@ -10,10 +10,8 @@ class CreateContentCategoryUseCase {
 
   const CreateContentCategoryUseCase(this._repository);
 
-  /// Returns [Right(ContentCategory)] jika berhasil.
-  Future<Either<Failure, ContentCategory>> call(
-    ContentCategory category,
-  ) {
+  /// Returns [Right(void)] jika berhasil.
+  Future<Either<Failure, void>> call(ContentCategory category) {
     return _repository.createCategory(category);
   }
 }

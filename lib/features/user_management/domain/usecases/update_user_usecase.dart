@@ -10,8 +10,8 @@ class UpdateUserUseCase {
 
   const UpdateUserUseCase(this._repository);
 
-  /// Returns [Right(CmsUser)] jika berhasil.
-  Future<Either<Failure, CmsUser>> call(CmsUser user) {
+  /// Returns [Right(void)] jika berhasil.
+  Future<Either<Failure, void>> call(CmsUser user) {
     return _repository.updateUser(user);
   }
 }

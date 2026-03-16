@@ -1,30 +1,24 @@
 import 'package:equatable/equatable.dart';
 
 /// Entity user CMS.
+///
+/// Sesuai API spec: id, email, name, role, is_active, created_at, updated_at.
+/// Role: admin, editor, viewer.
 class CmsUser extends Equatable {
   /// ID unik user.
   final String id;
 
-  /// Username untuk login.
-  final String username;
-
   /// Alamat email.
   final String email;
 
-  /// Nama lengkap.
-  final String fullName;
+  /// Nama user.
+  final String name;
 
-  /// URL avatar (opsional).
-  final String? avatarUrl;
-
-  /// Role user (super_admin, admin, editor, viewer).
+  /// Role user (admin, editor, viewer).
   final String role;
 
   /// Apakah user aktif.
   final bool isActive;
-
-  /// Tanggal login terakhir (opsional).
-  final DateTime? lastLoginAt;
 
   /// Tanggal dibuat.
   final DateTime createdAt;
@@ -34,13 +28,10 @@ class CmsUser extends Equatable {
 
   const CmsUser({
     required this.id,
-    required this.username,
     required this.email,
-    required this.fullName,
-    this.avatarUrl,
+    required this.name,
     required this.role,
     this.isActive = true,
-    this.lastLoginAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -48,84 +39,11 @@ class CmsUser extends Equatable {
   @override
   List<Object?> get props => [
         id,
-        username,
         email,
-        fullName,
-        avatarUrl,
+        name,
         role,
         isActive,
-        lastLoginAt,
         createdAt,
         updatedAt,
       ];
-}
-
-/// Entity role user untuk display.
-class UserRole extends Equatable {
-  /// ID role (super_admin, admin, editor, viewer).
-  final String id;
-
-  /// Nama tampilan role.
-  final String name;
-
-  /// Deskripsi role.
-  final String description;
-
-  /// Daftar permission.
-  final List<String> permissions;
-
-  const UserRole({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.permissions,
-  });
-
-  @override
-  List<Object?> get props => [id, name, description, permissions];
-
-  /// Daftar role yang tersedia.
-  static const List<UserRole> availableRoles = [
-    UserRole(
-      id: 'super_admin',
-      name: 'Super Admin',
-      description: 'Akses penuh ke seluruh sistem',
-      permissions: [
-        'content.create',
-        'content.edit',
-        'content.delete',
-        'media.upload',
-        'domain.manage',
-        'user.manage',
-      ],
-    ),
-    UserRole(
-      id: 'admin',
-      name: 'Admin',
-      description: 'Mengelola konten dan pengaturan',
-      permissions: [
-        'content.create',
-        'content.edit',
-        'content.delete',
-        'media.upload',
-        'domain.manage',
-      ],
-    ),
-    UserRole(
-      id: 'editor',
-      name: 'Editor',
-      description: 'Membuat dan mengedit konten',
-      permissions: [
-        'content.create',
-        'content.edit',
-        'media.upload',
-      ],
-    ),
-    UserRole(
-      id: 'viewer',
-      name: 'Viewer',
-      description: 'Hanya dapat melihat konten',
-      permissions: [],
-    ),
-  ];
 }

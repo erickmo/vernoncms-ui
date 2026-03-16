@@ -142,7 +142,7 @@ class _PageListViewState extends State<_PageListView> {
     DeleteConfirmationDialog.show(
       context: context,
       title: AppStrings.deletePage,
-      message: '${AppStrings.deletePageConfirm} "${page.title}"?',
+      message: '${AppStrings.deletePageConfirm} "${page.name}"?',
       onConfirm: () => cubit.deletePage(page.id),
     );
   }

@@ -17,11 +17,15 @@ class ContentTable extends StatelessWidget {
   /// Callback saat user menekan tombol hapus.
   final ValueChanged<Content> onDelete;
 
+  /// Callback saat user menekan tombol publish.
+  final ValueChanged<Content>? onPublish;
+
   const ContentTable({
     super.key,
     required this.contents,
     required this.onEdit,
     required this.onDelete,
+    this.onPublish,
   });
 
   @override
@@ -39,7 +43,6 @@ class ContentTable extends StatelessWidget {
           ),
           columns: const [
             DataColumn(label: Text(AppStrings.contentColumnTitle)),
-            DataColumn(label: Text(AppStrings.contentColumnCategory)),
             DataColumn(label: Text(AppStrings.contentColumnStatus)),
             DataColumn(label: Text(AppStrings.contentColumnPublishedAt)),
             DataColumn(label: Text(AppStrings.columnActions)),
@@ -54,7 +57,6 @@ class ContentTable extends StatelessWidget {
     return DataRow(
       cells: [
         DataCell(_buildTitleCell(content)),
-        DataCell(Text(content.categoryName ?? '-')),
         DataCell(_buildStatusChip(content.status)),
         DataCell(Text(_formatDate(content.publishedAt))),
         DataCell(_buildActions(content)),
@@ -63,35 +65,12 @@ class ContentTable extends StatelessWidget {
   }
 
   Widget _buildTitleCell(Content content) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (content.isFeatured)
-          const Padding(
-            padding: EdgeInsets.only(right: AppDimensions.spacingXS),
-            child: Icon(
-              Icons.star,
-              size: AppDimensions.iconS,
-              color: AppColors.warning,
-            ),
-          ),
-        if (content.isPinned)
-          const Padding(
-            padding: EdgeInsets.only(right: AppDimensions.spacingXS),
-            child: Icon(
-              Icons.push_pin,
-              size: AppDimensions.iconS,
-              color: AppColors.info,
-            ),
-          ),
-        Flexible(
-          child: Text(
-            content.title,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-        ),
-      ],
+    return Flexible(
+      child: Text(
+        content.title,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontWeight: FontWeight.w500),
+      ),
     );
   }
 
@@ -104,10 +83,10 @@ class ContentTable extends StatelessWidget {
         chipColor = AppColors.success;
         label = AppStrings.contentStatusPublished;
       case 'archived':
-        chipColor = AppColors.textHint;
+        chipColor = AppColors.error;
         label = AppStrings.contentStatusArchived;
       default:
-        chipColor = AppColors.warning;
+        chipColor = AppColors.textHint;
         label = AppStrings.contentStatusDraft;
     }
 
@@ -140,6 +119,13 @@ class ContentTable extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (content.status == 'draft' && onPublish != null)
+          IconButton(
+            icon: const Icon(Icons.publish_outlined, size: AppDimensions.iconS),
+            color: AppColors.success,
+            tooltip: AppStrings.contentPublish,
+            onPressed: () => onPublish!(content),
+          ),
         IconButton(
           icon: const Icon(Icons.edit_outlined, size: AppDimensions.iconS),
           color: AppColors.primary,

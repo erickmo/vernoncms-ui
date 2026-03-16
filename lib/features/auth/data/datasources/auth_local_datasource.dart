@@ -27,21 +27,21 @@ abstract class AuthLocalDataSource {
   /// Hapus semua token.
   Future<void> clearTokens();
 
-  /// Simpan username untuk remember me.
-  Future<void> saveRememberedUsername(String username);
+  /// Simpan email untuk remember me.
+  Future<void> saveRememberedEmail(String email);
 
-  /// Ambil username yang disimpan.
-  String? getRememberedUsername();
+  /// Ambil email yang disimpan.
+  String? getRememberedEmail();
 
-  /// Hapus username yang disimpan.
-  Future<void> clearRememberedUsername();
+  /// Hapus email yang disimpan.
+  Future<void> clearRememberedEmail();
 }
 
 /// Implementasi [AuthLocalDataSource] menggunakan SharedPreferences.
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SharedPreferences _prefs;
 
-  static const String _rememberedUsernameKey = 'remembered_username';
+  static const String _rememberedEmailKey = 'remembered_email';
 
   const AuthLocalDataSourceImpl(this._prefs);
 
@@ -72,17 +72,17 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
-  Future<void> saveRememberedUsername(String username) async {
-    await _prefs.setString(_rememberedUsernameKey, username);
+  Future<void> saveRememberedEmail(String email) async {
+    await _prefs.setString(_rememberedEmailKey, email);
   }
 
   @override
-  String? getRememberedUsername() {
-    return _prefs.getString(_rememberedUsernameKey);
+  String? getRememberedEmail() {
+    return _prefs.getString(_rememberedEmailKey);
   }
 
   @override
-  Future<void> clearRememberedUsername() async {
-    await _prefs.remove(_rememberedUsernameKey);
+  Future<void> clearRememberedEmail() async {
+    await _prefs.remove(_rememberedEmailKey);
   }
 }

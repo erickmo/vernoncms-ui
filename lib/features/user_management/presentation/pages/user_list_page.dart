@@ -9,10 +9,9 @@ import '../../../../core/di/injection.dart';
 import '../../../content/presentation/widgets/delete_confirmation_dialog.dart';
 import '../../domain/entities/cms_user.dart';
 import '../cubit/user_list_cubit.dart';
-import '../widgets/reset_password_dialog.dart';
 import '../widgets/user_table.dart';
 
-/// Halaman daftar user.
+/// Halaman daftar user (admin only).
 class UserListPage extends StatelessWidget {
   const UserListPage({super.key});
 
@@ -35,7 +34,6 @@ class _UserListView extends StatefulWidget {
 class _UserListViewState extends State<_UserListView> {
   final _searchController = TextEditingController();
   String _roleFilter = '';
-  String _statusFilter = '';
 
   @override
   void dispose() {
@@ -50,7 +48,7 @@ class _UserListViewState extends State<_UserListView> {
       builder: (context, state) => state.when(
         initial: () => const SizedBox.shrink(),
         loading: () => const Center(child: CircularProgressIndicator()),
-        loaded: (users, searchQuery, roleFilter, statusFilter) =>
+        loaded: (users, searchQuery, roleFilter) =>
             _buildContent(context, users),
         error: (message) => _buildError(context, message),
       ),
@@ -82,8 +80,6 @@ class _UserListViewState extends State<_UserListView> {
             users: users,
             onEdit: (user) => context.go('/users/${user.id}/edit'),
             onDelete: (user) => _showDeleteDialog(context, user),
-            onToggleActive: (user) => _toggleActive(context, user),
-            onResetPassword: (user) => _showResetPasswordDialog(context, user),
           ),
         ],
       ),
@@ -151,10 +147,6 @@ class _UserListViewState extends State<_UserListView> {
                 child: Text(AppStrings.userAllRoles),
               ),
               DropdownMenuItem(
-                value: 'super_admin',
-                child: Text('Super Admin'),
-              ),
-              DropdownMenuItem(
                 value: 'admin',
                 child: Text('Admin'),
               ),
@@ -175,53 +167,16 @@ class _UserListViewState extends State<_UserListView> {
             },
           ),
         ),
-        SizedBox(
-          width: 180,
-          child: DropdownButtonFormField<String>(
-            initialValue: _statusFilter.isEmpty ? null : _statusFilter,
-            decoration: const InputDecoration(
-              labelText: AppStrings.userColumnStatus,
-              border: OutlineInputBorder(),
-            ),
-            items: const [
-              DropdownMenuItem(
-                value: null,
-                child: Text(AppStrings.userAllStatuses),
-              ),
-              DropdownMenuItem(
-                value: 'active',
-                child: Text(AppStrings.userStatusActive),
-              ),
-              DropdownMenuItem(
-                value: 'inactive',
-                child: Text(AppStrings.userStatusInactive),
-              ),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _statusFilter = value ?? '';
-              });
-              _applyFilters(context);
-            },
-          ),
-        ),
       ],
     );
   }
 
   void _applyFilters(BuildContext context) {
     final search = _searchController.text.trim();
-    bool? isActive;
-    if (_statusFilter == 'active') {
-      isActive = true;
-    } else if (_statusFilter == 'inactive') {
-      isActive = false;
-    }
 
     context.read<UserListCubit>().loadUsers(
           search: search.isNotEmpty ? search : null,
           role: _roleFilter.isNotEmpty ? _roleFilter : null,
-          isActive: isActive,
         );
   }
 
@@ -230,34 +185,8 @@ class _UserListViewState extends State<_UserListView> {
     DeleteConfirmationDialog.show(
       context: context,
       title: AppStrings.userDelete,
-      message: '${AppStrings.userDeleteConfirm} "${user.fullName}"?',
+      message: '${AppStrings.userDeleteConfirm} "${user.name}"?',
       onConfirm: () => cubit.deleteUser(user.id),
-    );
-  }
-
-  void _toggleActive(BuildContext context, CmsUser user) {
-    context.read<UserListCubit>().toggleUserActive(user.id);
-  }
-
-  void _showResetPasswordDialog(BuildContext context, CmsUser user) {
-    final cubit = context.read<UserListCubit>();
-    ResetPasswordDialog.show(
-      context: context,
-      userName: user.fullName,
-      onConfirm: (newPassword) {
-        cubit.resetUserPassword(user.id, newPassword: newPassword).then(
-          (success) {
-            if (success && context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(AppStrings.userPasswordResetSuccess),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            }
-          },
-        );
-      },
     );
   }
 

@@ -20,16 +20,16 @@ class LoginCubit extends Cubit<LoginState> {
         _getRememberedUsernameUseCase = getRememberedUsernameUseCase,
         super(const LoginState.initial());
 
-  /// Memuat username yang tersimpan dari remember me.
-  Future<void> loadRememberedUsername() async {
+  /// Memuat email yang tersimpan dari remember me.
+  Future<void> loadRememberedEmail() async {
     final result = await _getRememberedUsernameUseCase();
 
     result.fold(
       (_) => null,
-      (username) {
-        if (username != null && username.isNotEmpty) {
+      (email) {
+        if (email != null && email.isNotEmpty) {
           emit(LoginState.initial(
-            rememberedUsername: username,
+            rememberedEmail: email,
             rememberMe: true,
           ));
         }
@@ -37,16 +37,21 @@ class LoginCubit extends Cubit<LoginState> {
     );
   }
 
-  /// Melakukan login dengan [username] dan [password].
+  /// Set pesan sukses (misalnya setelah register berhasil).
+  void setSuccessMessage(String message) {
+    emit(LoginState.initial(successMessage: message));
+  }
+
+  /// Melakukan login dengan [email] dan [password].
   Future<void> login({
-    required String username,
+    required String email,
     required String password,
     required bool rememberMe,
   }) async {
     emit(const LoginState.loading());
 
     final params = LoginParams(
-      username: username,
+      email: email,
       password: password,
       rememberMe: rememberMe,
     );

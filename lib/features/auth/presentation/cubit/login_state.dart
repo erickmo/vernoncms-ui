@@ -5,8 +5,9 @@ part of 'login_cubit.dart';
 class LoginState with _$LoginState {
   /// State awal saat halaman login dibuka.
   const factory LoginState.initial({
-    @Default('') String rememberedUsername,
+    @Default('') String rememberedEmail,
     @Default(false) bool rememberMe,
+    @Default('') String successMessage,
   }) = LoginInitial;
 
   /// Sedang proses login ke server.

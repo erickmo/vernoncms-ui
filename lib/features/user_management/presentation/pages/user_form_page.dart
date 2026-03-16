@@ -8,10 +8,11 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/cms_user.dart';
 import '../cubit/user_form_cubit.dart';
-import '../widgets/user_form_main.dart';
-import '../widgets/user_form_sidebar.dart';
 
 /// Halaman form user untuk membuat atau mengedit user.
+///
+/// Create: email, name, role, password.
+/// Edit: email, name, role, is_active.
 class UserFormPage extends StatelessWidget {
   /// ID user yang akan diedit. Null jika membuat baru.
   final String? userId;
@@ -45,15 +46,9 @@ class _UserFormView extends StatefulWidget {
 class _UserFormViewState extends State<_UserFormView> {
   final _formKey = GlobalKey<FormState>();
 
-  // Main fields
-  late final TextEditingController _usernameController;
   late final TextEditingController _emailController;
-  late final TextEditingController _fullNameController;
-  late final TextEditingController _avatarUrlController;
-
-  // Sidebar fields
+  late final TextEditingController _nameController;
   late final TextEditingController _passwordController;
-  late final TextEditingController _confirmPasswordController;
 
   String _role = 'editor';
   bool _isActive = true;
@@ -64,14 +59,10 @@ class _UserFormViewState extends State<_UserFormView> {
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController();
     _emailController = TextEditingController();
-    _fullNameController = TextEditingController();
-    _avatarUrlController = TextEditingController();
+    _nameController = TextEditingController();
     _passwordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
 
-    // Jika create, langsung set initialized.
     if (!_isEditing) {
       _initialized = true;
     }
@@ -79,20 +70,15 @@ class _UserFormViewState extends State<_UserFormView> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
     _emailController.dispose();
-    _fullNameController.dispose();
-    _avatarUrlController.dispose();
+    _nameController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
   void _populateFields(CmsUser user) {
-    _usernameController.text = user.username;
     _emailController.text = user.email;
-    _fullNameController.text = user.fullName;
-    _avatarUrlController.text = user.avatarUrl ?? '';
+    _nameController.text = user.name;
     _role = user.role;
     _isActive = user.isActive;
   }
@@ -101,15 +87,10 @@ class _UserFormViewState extends State<_UserFormView> {
     final now = DateTime.now();
     return CmsUser(
       id: existing?.id ?? '',
-      username: _usernameController.text.trim(),
       email: _emailController.text.trim(),
-      fullName: _fullNameController.text.trim(),
-      avatarUrl: _avatarUrlController.text.trim().isEmpty
-          ? null
-          : _avatarUrlController.text.trim(),
+      name: _nameController.text.trim(),
       role: _role,
       isActive: _isActive,
-      lastLoginAt: existing?.lastLoginAt,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
     );
@@ -128,7 +109,7 @@ class _UserFormViewState extends State<_UserFormView> {
         ? await cubit.updateUser(user)
         : await cubit.createUser(
             user,
-            password: _passwordController.text,
+            passwordHash: _passwordController.text,
           );
 
     if (success && mounted) {
@@ -158,7 +139,7 @@ class _UserFormViewState extends State<_UserFormView> {
             return _buildForm(context);
           },
           saving: () => _buildForm(context, isSaving: true),
-          saved: (_) => _buildForm(context),
+          saved: () => _buildForm(context),
           error: (message) => _buildForm(context),
         );
       },
@@ -173,7 +154,7 @@ class _UserFormViewState extends State<_UserFormView> {
           backgroundColor: AppColors.error,
         ),
       ),
-      saved: (_) => ScaffoldMessenger.of(context).showSnackBar(
+      saved: () => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             _isEditing ? AppStrings.userUpdated : AppStrings.userCreated,
@@ -194,13 +175,39 @@ class _UserFormViewState extends State<_UserFormView> {
           children: [
             _buildHeader(context, isSaving),
             const SizedBox(height: AppDimensions.spacingL),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                if (constraints.maxWidth >= 900) {
-                  return _buildDesktopLayout();
-                }
-                return _buildMobileLayout();
-              },
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppDimensions.spacingL),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          AppStrings.userInfoSection,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: AppDimensions.spacingM),
+                        _buildEmailField(),
+                        const SizedBox(height: AppDimensions.spacingM),
+                        _buildNameField(),
+                        const SizedBox(height: AppDimensions.spacingM),
+                        _buildRoleDropdown(),
+                        const SizedBox(height: AppDimensions.spacingM),
+                        if (_isEditing) _buildActiveSwitch(),
+                        if (!_isEditing) ...[
+                          _buildPasswordField(),
+                          const SizedBox(height: AppDimensions.spacingM),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -244,57 +251,95 @@ class _UserFormViewState extends State<_UserFormView> {
     );
   }
 
-  Widget _buildDesktopLayout() {
+  Widget _buildEmailField() {
+    return TextFormField(
+      controller: _emailController,
+      decoration: const InputDecoration(
+        labelText: AppStrings.emailLabel,
+        hintText: AppStrings.emailHint,
+        border: OutlineInputBorder(),
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return AppStrings.emailRequired;
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildNameField() {
+    return TextFormField(
+      controller: _nameController,
+      decoration: const InputDecoration(
+        labelText: AppStrings.userNameLabel,
+        hintText: AppStrings.userNameHint,
+        border: OutlineInputBorder(),
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return AppStrings.userNameRequired;
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildRoleDropdown() {
+    return DropdownButtonFormField<String>(
+      initialValue: _role,
+      decoration: const InputDecoration(
+        labelText: AppStrings.userRoleLabel,
+        border: OutlineInputBorder(),
+      ),
+      items: const [
+        DropdownMenuItem(value: 'admin', child: Text('Admin')),
+        DropdownMenuItem(value: 'editor', child: Text('Editor')),
+        DropdownMenuItem(value: 'viewer', child: Text('Viewer')),
+      ],
+      onChanged: (value) {
+        if (value != null) {
+          setState(() => _role = value);
+        }
+      },
+    );
+  }
+
+  Widget _buildActiveSwitch() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          flex: 3,
-          child: UserFormMain(
-            usernameController: _usernameController,
-            emailController: _emailController,
-            fullNameController: _fullNameController,
-            avatarUrlController: _avatarUrlController,
+        const Text(
+          AppStrings.userActiveLabel,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(width: AppDimensions.spacingL),
-        Expanded(
-          flex: 1,
-          child: UserFormSidebar(
-            role: _role,
-            onRoleChanged: (value) => setState(() => _role = value),
-            isActive: _isActive,
-            onActiveChanged: (value) => setState(() => _isActive = value),
-            passwordController: _passwordController,
-            confirmPasswordController: _confirmPasswordController,
-            isCreating: !_isEditing,
-          ),
+        Switch(
+          value: _isActive,
+          onChanged: (value) => setState(() => _isActive = value),
+          activeThumbColor: AppColors.success,
         ),
       ],
     );
   }
 
-  Widget _buildMobileLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        UserFormMain(
-          usernameController: _usernameController,
-          emailController: _emailController,
-          fullNameController: _fullNameController,
-          avatarUrlController: _avatarUrlController,
-        ),
-        const SizedBox(height: AppDimensions.spacingL),
-        UserFormSidebar(
-          role: _role,
-          onRoleChanged: (value) => setState(() => _role = value),
-          isActive: _isActive,
-          onActiveChanged: (value) => setState(() => _isActive = value),
-          passwordController: _passwordController,
-          confirmPasswordController: _confirmPasswordController,
-          isCreating: !_isEditing,
-        ),
-      ],
+  Widget _buildPasswordField() {
+    return TextFormField(
+      controller: _passwordController,
+      obscureText: true,
+      decoration: const InputDecoration(
+        labelText: AppStrings.passwordLabel,
+        hintText: AppStrings.passwordHint,
+        border: OutlineInputBorder(),
+      ),
+      validator: (value) {
+        if (!_isEditing && (value == null || value.trim().isEmpty)) {
+          return AppStrings.passwordRequired;
+        }
+        return null;
+      },
     );
   }
 }

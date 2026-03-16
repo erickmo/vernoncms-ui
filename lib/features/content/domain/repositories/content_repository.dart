@@ -9,19 +9,21 @@ abstract class ContentRepository {
   Future<Either<Failure, List<Content>>> getContents({
     String? search,
     String? status,
-    String? categoryId,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   });
 
   /// Ambil detail konten berdasarkan [id].
   Future<Either<Failure, Content>> getContentById(String id);
 
   /// Buat konten baru.
-  Future<Either<Failure, Content>> createContent(Content content);
+  Future<Either<Failure, void>> createContent(Content content);
 
   /// Perbarui konten yang sudah ada.
-  Future<Either<Failure, Content>> updateContent(Content content);
+  Future<Either<Failure, void>> updateContent(Content content);
+
+  /// Publikasikan konten (draft -> published).
+  Future<Either<Failure, void>> publishContent(String id);
 
   /// Hapus konten berdasarkan [id].
   Future<Either<Failure, void>> deleteContent(String id);

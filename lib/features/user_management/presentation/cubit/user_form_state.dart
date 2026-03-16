@@ -18,9 +18,7 @@ sealed class UserFormState with _$UserFormState {
   const factory UserFormState.saving() = UserFormSaving;
 
   /// User berhasil disimpan.
-  const factory UserFormState.saved({
-    required CmsUser user,
-  }) = UserFormSaved;
+  const factory UserFormState.saved() = UserFormSaved;
 
   /// Gagal memuat atau menyimpan data.
   const factory UserFormState.error(String message) = UserFormError;

@@ -5,16 +5,18 @@ import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../models/cms_user_model.dart';
 
 /// Datasource remote untuk user management.
+///
+/// API: `/api/v1/users` (admin only).
+/// Response wrapped: `{ "data": { ... } }`, list: `{ "data": { "items": [...], "total", "page", "limit" } }`.
 abstract class UserRemoteDataSource {
-  /// Ambil daftar user.
+  /// Ambil daftar user dengan pagination.
   ///
   /// Throws [ServerException] jika gagal.
   Future<List<CmsUserModel>> getUsers({
     String? search,
     String? role,
-    bool? isActive,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   });
 
   /// Ambil detail user berdasarkan [id].
@@ -24,28 +26,20 @@ abstract class UserRemoteDataSource {
 
   /// Buat user baru.
   ///
+  /// [data] berisi: email, password_hash, name, role.
   /// Throws [ServerException] jika gagal.
-  Future<CmsUserModel> createUser(Map<String, dynamic> data);
+  Future<void> createUser(Map<String, dynamic> data);
 
   /// Perbarui user yang sudah ada.
   ///
+  /// [data] berisi: email, name, role (dan opsional is_active).
   /// Throws [ServerException] jika gagal.
-  Future<CmsUserModel> updateUser(String id, Map<String, dynamic> data);
+  Future<void> updateUser(String id, Map<String, dynamic> data);
 
-  /// Hapus user berdasarkan [id] (soft delete).
+  /// Hapus user berdasarkan [id].
   ///
   /// Throws [ServerException] jika gagal.
   Future<void> deleteUser(String id);
-
-  /// Toggle status aktif user.
-  ///
-  /// Throws [ServerException] jika gagal.
-  Future<CmsUserModel> toggleUserActive(String id);
-
-  /// Reset password user oleh admin.
-  ///
-  /// Throws [ServerException] jika gagal.
-  Future<void> resetUserPassword(String id, Map<String, dynamic> data);
 }
 
 /// Implementasi [UserRemoteDataSource] menggunakan Dio.
@@ -58,14 +52,13 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future<List<CmsUserModel>> getUsers({
     String? search,
     String? role,
-    bool? isActive,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) async {
     try {
       final queryParameters = <String, dynamic>{
         'page': page,
-        'per_page': perPage,
+        'limit': limit,
       };
       if (search != null && search.isNotEmpty) {
         queryParameters['search'] = search;
@@ -73,17 +66,15 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       if (role != null && role.isNotEmpty) {
         queryParameters['role'] = role;
       }
-      if (isActive != null) {
-        queryParameters['is_active'] = isActive;
-      }
 
       final response = await _apiClient.dio.get(
-        '/api/users',
+        '/api/v1/users',
         queryParameters: queryParameters,
       );
 
-      final list = response.data as List<dynamic>;
-      return list
+      final data = response.data['data'] as Map<String, dynamic>;
+      final items = data['items'] as List<dynamic>;
+      return items
           .map((e) => CmsUserModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
@@ -97,10 +88,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<CmsUserModel> getUserById(String id) async {
     try {
-      final response = await _apiClient.dio.get('/api/users/$id');
-      return CmsUserModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      final response = await _apiClient.dio.get('/api/v1/users/$id');
+      final data = response.data['data'] as Map<String, dynamic>;
+      return CmsUserModel.fromJson(data);
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -110,15 +100,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<CmsUserModel> createUser(Map<String, dynamic> data) async {
+  Future<void> createUser(Map<String, dynamic> data) async {
     try {
-      final response = await _apiClient.dio.post(
-        '/api/users',
+      await _apiClient.dio.post(
+        '/api/v1/users',
         data: data,
       );
-      return CmsUserModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -128,17 +115,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<CmsUserModel> updateUser(
+  Future<void> updateUser(
     String id,
     Map<String, dynamic> data,
   ) async {
     try {
-      final response = await _apiClient.dio.put(
-        '/api/users/$id',
+      await _apiClient.dio.put(
+        '/api/v1/users/$id',
         data: data,
-      );
-      return CmsUserModel.fromJson(
-        response.data as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw ServerException(
@@ -151,42 +135,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<void> deleteUser(String id) async {
     try {
-      await _apiClient.dio.delete('/api/users/$id');
-    } on DioException catch (e) {
-      throw ServerException(
-        _extractErrorMessage(e),
-        statusCode: e.response?.statusCode,
-      );
-    }
-  }
-
-  @override
-  Future<CmsUserModel> toggleUserActive(String id) async {
-    try {
-      final response = await _apiClient.dio.put(
-        '/api/users/$id/toggle-active',
-      );
-      return CmsUserModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
-      throw ServerException(
-        _extractErrorMessage(e),
-        statusCode: e.response?.statusCode,
-      );
-    }
-  }
-
-  @override
-  Future<void> resetUserPassword(
-    String id,
-    Map<String, dynamic> data,
-  ) async {
-    try {
-      await _apiClient.dio.put(
-        '/api/users/$id/reset-password',
-        data: data,
-      );
+      await _apiClient.dio.delete('/api/v1/users/$id');
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -198,8 +147,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   String _extractErrorMessage(DioException e) {
     final data = e.response?.data;
     if (data is Map<String, dynamic>) {
-      return data['message'] as String? ??
-          data['error'] as String? ??
+      return data['error'] as String? ??
+          data['message'] as String? ??
           'Terjadi kesalahan pada server';
     }
     return e.message ?? 'Terjadi kesalahan pada server';

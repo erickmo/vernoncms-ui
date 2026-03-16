@@ -47,8 +47,8 @@ class PageFormCubit extends Cubit<PageFormState> {
         emit(PageFormState.error(failure.message));
         return false;
       },
-      (page) {
-        emit(PageFormState.saved(page: page));
+      (_) {
+        emit(const PageFormState.saved());
         return true;
       },
     );
@@ -65,8 +65,8 @@ class PageFormCubit extends Cubit<PageFormState> {
         emit(PageFormState.error(failure.message));
         return false;
       },
-      (page) {
-        emit(PageFormState.saved(page: page));
+      (_) {
+        emit(const PageFormState.saved());
         return true;
       },
     );

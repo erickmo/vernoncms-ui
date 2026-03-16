@@ -10,8 +10,8 @@ class UpdatePageUseCase {
 
   const UpdatePageUseCase(this._repository);
 
-  /// Returns [Right(PageEntity)] jika berhasil.
-  Future<Either<Failure, PageEntity>> call(PageEntity pageEntity) {
+  /// Returns [Right(void)] jika berhasil.
+  Future<Either<Failure, void>> call(PageEntity pageEntity) {
     return _repository.updatePage(pageEntity);
   }
 }

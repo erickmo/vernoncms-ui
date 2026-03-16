@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
@@ -37,10 +38,10 @@ class PageTable extends StatelessWidget {
             AppColors.primary.withValues(alpha: 0.05),
           ),
           columns: const [
-            DataColumn(label: Text(AppStrings.pageColumnTitle)),
-            DataColumn(label: Text(AppStrings.pageColumnPageKey)),
-            DataColumn(label: Text(AppStrings.pageColumnStatus)),
-            DataColumn(label: Text(AppStrings.pageColumnShowInNav)),
+            DataColumn(label: Text(AppStrings.pageColumnName)),
+            DataColumn(label: Text(AppStrings.pageColumnSlug)),
+            DataColumn(label: Text(AppStrings.pageColumnActive)),
+            DataColumn(label: Text(AppStrings.pageColumnCreatedAt)),
             DataColumn(label: Text(AppStrings.columnActions)),
           ],
           rows: pages.map((page) => _buildRow(page)).toList(),
@@ -52,81 +53,50 @@ class PageTable extends StatelessWidget {
   DataRow _buildRow(PageEntity page) {
     return DataRow(
       cells: [
-        DataCell(_buildTitleCell(page)),
-        DataCell(Text(page.pageKey)),
-        DataCell(_buildStatusChip(page.status)),
-        DataCell(_buildNavChip(page.showInNav)),
+        DataCell(_buildNameCell(page)),
+        DataCell(Text(page.slug)),
+        DataCell(_buildActiveChip(page.isActive)),
+        DataCell(Text(_formatDate(page.createdAt))),
         DataCell(_buildActions(page)),
       ],
     );
   }
 
-  Widget _buildTitleCell(PageEntity page) {
+  Widget _buildNameCell(PageEntity page) {
     return Flexible(
       child: Text(
-        page.title,
+        page.name,
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontWeight: FontWeight.w500),
       ),
     );
   }
 
-  Widget _buildStatusChip(String status) {
-    Color chipColor;
-    String label;
-    switch (status) {
-      case 'published':
-        chipColor = AppColors.success;
-        label = AppStrings.pageStatusPublished;
-      case 'archived':
-        chipColor = AppColors.textHint;
-        label = AppStrings.pageStatusArchived;
-      default:
-        chipColor = AppColors.warning;
-        label = AppStrings.pageStatusDraft;
-    }
-
+  Widget _buildActiveChip(bool isActive) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.spacingS,
         vertical: AppDimensions.spacingXS,
       ),
       decoration: BoxDecoration(
-        color: chipColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusS),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: chipColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavChip(bool showInNav) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingS,
-        vertical: AppDimensions.spacingXS,
-      ),
-      decoration: BoxDecoration(
-        color: showInNav
+        color: isActive
             ? AppColors.success.withValues(alpha: 0.1)
             : AppColors.textHint.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppDimensions.radiusS),
       ),
       child: Text(
-        showInNav ? AppStrings.visible : AppStrings.hidden,
+        isActive ? AppStrings.pageActiveLabel : AppStrings.pageInactiveLabel,
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: showInNav ? AppColors.success : AppColors.textHint,
+          color: isActive ? AppColors.success : AppColors.textHint,
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd MMM yyyy, HH:mm').format(date);
   }
 
   Widget _buildActions(PageEntity page) {

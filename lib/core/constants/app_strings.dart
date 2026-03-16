@@ -16,24 +16,39 @@ class AppStrings {
 
   // Auth - Login
   static const String loginSubtitle = 'Masuk ke akun Anda';
-  static const String usernameLabel = 'Username';
-  static const String usernameHint = 'Masukkan username';
-  static const String usernameRequired = 'Username wajib diisi';
-  static const String passwordLabel = 'Password';
-  static const String passwordHint = 'Masukkan password';
-  static const String passwordRequired = 'Password wajib diisi';
-  static const String loginButton = 'Masuk';
-  static const String rememberMe = 'Ingat saya';
-  static const String forgotPassword = 'Lupa Password?';
-  static const String logout = 'Keluar';
-
-  // Auth - Forgot Password
-  static const String forgotPasswordTitle = 'Lupa Password';
-  static const String forgotPasswordSubtitle =
-      'Masukkan email Anda untuk menerima link reset password.';
   static const String emailLabel = 'Email';
   static const String emailHint = 'Masukkan email';
   static const String emailRequired = 'Email wajib diisi';
+  static const String emailInvalid = 'Format email tidak valid';
+  static const String passwordLabel = 'Password';
+  static const String passwordHint = 'Masukkan password';
+  static const String passwordRequired = 'Password wajib diisi';
+  static const String passwordMinLength = 'Password minimal 8 karakter';
+  static const String loginButton = 'Masuk';
+  static const String rememberMe = 'Ingat saya';
+  static const String noAccount = 'Belum punya akun?';
+  static const String registerLink = 'Daftar';
+  static const String hasAccount = 'Sudah punya akun?';
+  static const String logout = 'Keluar';
+
+  // Auth - Register
+  static const String registerSubtitle = 'Buat akun baru';
+  static const String registerNameLabel = 'Nama Lengkap';
+  static const String registerNameHint = 'Masukkan nama lengkap';
+  static const String registerNameRequired = 'Nama lengkap wajib diisi';
+  static const String registerButton = 'Daftar';
+  static const String registerSuccess =
+      'Registrasi berhasil! Silakan login dengan akun Anda.';
+
+  // Roles
+  static const String roleAdmin = 'Admin';
+  static const String roleEditor = 'Editor';
+  static const String roleViewer = 'Viewer';
+
+  // Auth - Forgot Password (placeholder — not in current API spec)
+  static const String forgotPasswordTitle = 'Lupa Password';
+  static const String forgotPasswordSubtitle =
+      'Masukkan email Anda untuk menerima link reset password.';
   static const String sendResetLink = 'Kirim Link Reset';
   static const String backToLogin = 'Kembali ke Login';
   static const String resetLinkSent = 'Link Reset Terkirim';
@@ -136,104 +151,30 @@ class AppStrings {
   static const String pageDeleted = 'Halaman berhasil dihapus';
 
   // Page Management - Table Columns
-  static const String pageColumnTitle = 'Judul';
-  static const String pageColumnPageKey = 'Page Key';
-  static const String pageColumnStatus = 'Status';
-  static const String pageColumnShowInNav = 'Navigasi';
+  static const String pageColumnName = 'Nama';
+  static const String pageColumnSlug = 'Slug';
+  static const String pageColumnActive = 'Status';
+  static const String pageColumnCreatedAt = 'Dibuat';
 
-  // Page Management - Status
-  static const String pageStatusLabel = 'Status';
-  static const String pageStatusDraft = 'Draft';
-  static const String pageStatusPublished = 'Published';
-  static const String pageStatusArchived = 'Archived';
+  // Page Management - Active Status
+  static const String pageActiveLabel = 'Aktif';
+  static const String pageInactiveLabel = 'Nonaktif';
 
-  // Page Management - Visibility
-  static const String pageVisibilityLabel = 'Visibilitas';
-  static const String pageVisibilityPublic = 'Public';
-  static const String pageVisibilityPrivate = 'Private';
-
-  // Page Management - Form Tabs
+  // Page Management - Form
   static const String pageTabContent = 'Konten';
-  static const String pageTabHero = 'Hero';
-  static const String pageTabSeoSettings = 'SEO & Settings';
-
-  // Page Management - Content Fields
-  static const String pageTitleLabel = 'Judul Halaman';
-  static const String pageTitleHint = 'Masukkan judul halaman';
-  static const String pageTitleRequired = 'Judul halaman wajib diisi';
-  static const String pageKeyLabel = 'Page Key';
-  static const String pageKeyHint = 'contoh: homepage, about, contact';
-  static const String pageKeyRequired = 'Page key wajib diisi';
+  static const String pageNameLabel = 'Nama Halaman';
+  static const String pageNameHint = 'Masukkan nama halaman';
+  static const String pageNameRequired = 'Nama halaman wajib diisi';
   static const String pageSlugLabel = 'Slug';
   static const String pageSlugHint = 'slug-halaman';
   static const String pageSlugRequired = 'Slug wajib diisi';
-  static const String pageCaptionLabel = 'Caption';
-  static const String pageCaptionHint = 'Subtitle atau tagline (opsional)';
-  static const String pageBodyLabel = 'Konten';
-  static const String pageBodyHint = 'Tulis konten halaman di sini...';
-
-  // Page Management - Hero Fields
-  static const String pageHeroTitleLabel = 'Hero Title';
-  static const String pageHeroTitleHint = 'Judul hero section';
-  static const String pageHeroSubtitleLabel = 'Hero Subtitle';
-  static const String pageHeroSubtitleHint = 'Subtitle hero section';
-  static const String pageHeroImageUrlLabel = 'Hero Image URL';
-  static const String pageHeroImageUrlHint = 'https://example.com/image.jpg';
-  static const String pageHeroCtaTextLabel = 'CTA Text';
-  static const String pageHeroCtaTextHint = 'Label tombol CTA';
-  static const String pageHeroCtaUrlLabel = 'CTA URL';
-  static const String pageHeroCtaUrlHint = 'https://example.com';
-
-  // Page Management - SEO Fields
-  static const String pageMetaKeywordsLabel = 'Meta Keywords';
-  static const String pageMetaKeywordsHint = 'keyword1, keyword2, keyword3';
-  static const String pageNoIndexLabel = 'No Index';
-  static const String pageNoFollowLabel = 'No Follow';
-
-  // Page Management - OG Fields
-  static const String pageOgSection = 'Open Graph';
-  static const String pageOgTitleLabel = 'OG Title';
-  static const String pageOgTitleHint = 'Judul untuk Open Graph';
-  static const String pageOgDescriptionLabel = 'OG Description';
-  static const String pageOgDescriptionHint = 'Deskripsi untuk Open Graph';
-  static const String pageOgImageUrlLabel = 'OG Image URL';
-  static const String pageOgImageUrlHint = 'https://example.com/og-image.jpg';
-
-  // Page Management - Layout Settings
-  static const String pageLayoutSection = 'Layout';
-  static const String pageTemplateLabel = 'Template';
-  static const String pageTemplateDefault = 'Default';
-  static const String pageTemplateLanding = 'Landing';
-  static const String pageTemplateSidebar = 'Sidebar';
-  static const String pageShowHeaderLabel = 'Tampilkan Header';
-  static const String pageShowFooterLabel = 'Tampilkan Footer';
-  static const String pageShowBreadcrumbsLabel = 'Tampilkan Breadcrumbs';
-  static const String pageCustomCssLabel = 'Custom CSS';
-  static const String pageCustomCssHint = '.hero { color: red; }';
-
-  // Page Management - Navigation Settings
-  static const String pageNavSection = 'Navigasi';
-  static const String pageShowInNavLabel = 'Tampilkan di Navigasi';
-  static const String pageNavLabelLabel = 'Label Navigasi';
-  static const String pageNavLabelHint = 'Label override untuk navigasi';
-  static const String pageParentPageLabel = 'Halaman Induk';
-  static const String pageParentPageHint = 'ID halaman induk (opsional)';
-
-  // Page Management - Featured Image
-  static const String pageFeaturedImageSection = 'Gambar Featured';
-  static const String pageFeaturedImageUrlLabel = 'Featured Image URL';
-  static const String pageFeaturedImageUrlHint = 'https://example.com/image.jpg';
-  static const String pageFeaturedImageAltLabel = 'Alt Text';
-  static const String pageFeaturedImageAltHint = 'Deskripsi gambar';
-
-  // Page Management - Redirect
-  static const String pageRedirectSection = 'Redirect';
-  static const String pageRedirectUrlLabel = 'Redirect URL';
-  static const String pageRedirectUrlHint = 'https://example.com/target';
-  static const String pageRedirectTypeLabel = 'Tipe Redirect';
-  static const String pageRedirectTypeNone = 'Tidak Ada';
-  static const String pageRedirectType301 = '301 - Permanent';
-  static const String pageRedirectType302 = '302 - Temporary';
+  static const String pageVariablesLabel = 'Variables (JSON)';
+  static const String pageVariablesHint =
+      'JSON fleksibel untuk template fields (hero_title, sections, dll)';
+  static const String pageVariablesInvalid =
+      'Variables harus berupa JSON object yang valid';
+  static const String pageSettingsSection = 'Pengaturan';
+  static const String pageIsActiveLabel = 'Halaman Aktif';
 
   // Content (Articles/Posts)
   static const String addContent = 'Tambah Konten';
@@ -257,49 +198,25 @@ class AppStrings {
   static const String contentStatusPublished = 'Published';
   static const String contentStatusArchived = 'Archived';
   static const String contentAllStatuses = 'Semua Status';
-  static const String contentVisibility = 'Visibilitas';
-  static const String contentVisibilityPublic = 'Public';
-  static const String contentVisibilityPrivate = 'Private';
-  static const String contentVisibilityPasswordProtected = 'Password Protected';
   static const String contentCategory = 'Kategori';
   static const String contentNoCategory = 'Tanpa Kategori';
-  static const String contentAllCategories = 'Semua Kategori';
-  static const String contentTags = 'Tags';
-  static const String contentTagsHint = 'tag1, tag2, tag3';
-  static const String contentFeaturedImage = 'Gambar Utama';
-  static const String contentFeaturedImageUrl = 'URL Gambar';
-  static const String contentFeaturedImageUrlHint = 'https://example.com/image.jpg';
-  static const String contentFeaturedImageAlt = 'Alt Text';
-  static const String contentFeaturedImageAltHint = 'Deskripsi gambar';
-  static const String contentFeatured = 'Featured';
-  static const String contentPinned = 'Pinned';
-  static const String contentAllowComments = 'Izinkan Komentar';
-  static const String contentTemplate = 'Template';
-  static const String contentTemplateHint = 'Nama template (opsional)';
-  static const String contentNoIndex = 'No Index';
-  static const String contentNoFollow = 'No Follow';
-  static const String contentMetaKeywords = 'Meta Keywords';
-  static const String contentMetaKeywordsHint = 'keyword1, keyword2, keyword3';
-  static const String contentOgSection = 'Open Graph';
-  static const String contentOgTitle = 'OG Title';
-  static const String contentOgTitleHint = 'Judul Open Graph';
-  static const String contentOgDescription = 'OG Description';
-  static const String contentOgDescriptionHint = 'Deskripsi Open Graph';
-  static const String contentOgImageUrl = 'OG Image URL';
-  static const String contentOgImageUrlHint = 'https://example.com/og-image.jpg';
-  static const String contentPublishSection = 'Publikasi';
+  static const String contentPage = 'Halaman';
+  static const String contentNoPage = 'Tanpa Halaman';
+  static const String contentPageSection = 'Halaman';
   static const String contentCategorySection = 'Kategori';
-  static const String contentTagsSection = 'Tags';
-  static const String contentSettingsSection = 'Pengaturan';
-  static const String contentSaveAsDraft = 'Simpan Draft';
+  static const String contentMetadataSection = 'Metadata (JSON)';
+  static const String contentMetadataHint =
+      'JSON fleksibel untuk seo_title, seo_description, tags, dll';
+  static const String contentMetadataInvalid =
+      'Metadata harus berupa JSON object yang valid';
   static const String contentPublish = 'Publikasikan';
   static const String contentCreated = 'Konten berhasil dibuat';
   static const String contentUpdated = 'Konten berhasil diperbarui';
   static const String contentDeleted = 'Konten berhasil dihapus';
+  static const String contentPublished = 'Konten berhasil dipublikasikan';
 
   // Content Table Columns
   static const String contentColumnTitle = 'Judul';
-  static const String contentColumnCategory = 'Kategori';
   static const String contentColumnStatus = 'Status';
   static const String contentColumnPublishedAt = 'Tanggal Terbit';
 
@@ -424,40 +341,31 @@ class AppStrings {
   static const String userDeleted = 'User berhasil dihapus';
 
   // User Management - Table Columns
-  static const String userColumnName = 'Nama';
   static const String userColumnEmail = 'Email';
+  static const String userColumnName = 'Nama';
   static const String userColumnRole = 'Role';
   static const String userColumnStatus = 'Status';
-  static const String userColumnLastLogin = 'Login Terakhir';
+  static const String userColumnCreatedAt = 'Dibuat';
 
   // User Management - Form
   static const String userInfoSection = 'Informasi User';
-  static const String userFullNameLabel = 'Nama Lengkap';
-  static const String userFullNameHint = 'Masukkan nama lengkap';
-  static const String userFullNameRequired = 'Nama lengkap wajib diisi';
-  static const String userAvatarUrlLabel = 'Avatar URL';
-  static const String userAvatarUrlHint = 'https://example.com/avatar.jpg';
+  static const String userNameLabel = 'Nama';
+  static const String userNameHint = 'Masukkan nama';
+  static const String userNameRequired = 'Nama wajib diisi';
   static const String userRoleLabel = 'Role';
   static const String userActiveLabel = 'Status Aktif';
   static const String userAllRoles = 'Semua Role';
-  static const String userAllStatuses = 'Semua Status';
-
-  // User Management - Status
-  static const String userStatusActive = 'Aktif';
-  static const String userStatusInactive = 'Nonaktif';
-  static const String userActivate = 'Aktifkan';
-  static const String userDeactivate = 'Nonaktifkan';
 
   // User Management - Password
-  static const String userResetPassword = 'Reset Password';
-  static const String userNewPasswordLabel = 'Password Baru';
-  static const String userNewPasswordHint = 'Masukkan password baru';
   static const String userConfirmPasswordLabel = 'Konfirmasi Password';
   static const String userConfirmPasswordHint = 'Masukkan ulang password';
   static const String userConfirmPasswordRequired =
       'Konfirmasi password wajib diisi';
   static const String userPasswordMismatch = 'Password tidak cocok';
-  static const String userPasswordResetSuccess = 'Password berhasil direset';
+
+  // User Management - Status
+  static const String userStatusActive = 'Aktif';
+  static const String userStatusInactive = 'Nonaktif';
 
   // ─── Settings (Pengaturan Situs) ───
   static const String settingsTitle = 'Pengaturan Situs';

@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 
 /// Parameter untuk login.
 class LoginParams extends Equatable {
-  /// Username untuk login.
-  final String username;
+  /// Email untuk login.
+  final String email;
 
   /// Password untuk login.
   final String password;
@@ -12,11 +12,11 @@ class LoginParams extends Equatable {
   final bool rememberMe;
 
   const LoginParams({
-    required this.username,
+    required this.email,
     required this.password,
     this.rememberMe = false,
   });
 
   @override
-  List<Object> get props => [username, password, rememberMe];
+  List<Object> get props => [email, password, rememberMe];
 }

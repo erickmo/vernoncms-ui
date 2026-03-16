@@ -29,16 +29,15 @@ class ContentCategoryCubit extends Cubit<ContentCategoryState> {
         super(const ContentCategoryState.initial());
 
   /// Memuat daftar kategori konten.
-  Future<void> loadCategories({String? search}) async {
+  Future<void> loadCategories() async {
     emit(const ContentCategoryState.loading());
 
-    final result = await _getCategoriesUseCase(search: search);
+    final result = await _getCategoriesUseCase();
 
     result.fold(
       (failure) => emit(ContentCategoryState.error(failure.message)),
       (categories) => emit(ContentCategoryState.loaded(
         categories: categories,
-        searchQuery: search ?? '',
       )),
     );
   }
@@ -53,11 +52,7 @@ class ContentCategoryCubit extends Cubit<ContentCategoryState> {
         return false;
       },
       (_) {
-        // Refresh daftar setelah berhasil membuat kategori.
-        final currentSearch = state is ContentCategoryLoaded
-            ? (state as ContentCategoryLoaded).searchQuery
-            : null;
-        loadCategories(search: currentSearch);
+        loadCategories();
         return true;
       },
     );
@@ -73,11 +68,7 @@ class ContentCategoryCubit extends Cubit<ContentCategoryState> {
         return false;
       },
       (_) {
-        // Refresh daftar setelah berhasil memperbarui kategori.
-        final currentSearch = state is ContentCategoryLoaded
-            ? (state as ContentCategoryLoaded).searchQuery
-            : null;
-        loadCategories(search: currentSearch);
+        loadCategories();
         return true;
       },
     );
@@ -93,11 +84,7 @@ class ContentCategoryCubit extends Cubit<ContentCategoryState> {
         return false;
       },
       (_) {
-        // Refresh daftar setelah berhasil menghapus kategori.
-        final currentSearch = state is ContentCategoryLoaded
-            ? (state as ContentCategoryLoaded).searchQuery
-            : null;
-        loadCategories(search: currentSearch);
+        loadCategories();
         return true;
       },
     );

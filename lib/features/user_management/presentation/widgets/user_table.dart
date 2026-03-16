@@ -7,6 +7,8 @@ import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/cms_user.dart';
 
 /// Tabel data user.
+///
+/// Kolom: Email, Name, Role (chip), Active (chip), Created At, Actions.
 class UserTable extends StatelessWidget {
   /// Daftar user yang ditampilkan.
   final List<CmsUser> users;
@@ -17,19 +19,11 @@ class UserTable extends StatelessWidget {
   /// Callback saat user menekan tombol hapus.
   final ValueChanged<CmsUser> onDelete;
 
-  /// Callback saat user menekan tombol toggle active.
-  final ValueChanged<CmsUser> onToggleActive;
-
-  /// Callback saat user menekan tombol reset password.
-  final ValueChanged<CmsUser> onResetPassword;
-
   const UserTable({
     super.key,
     required this.users,
     required this.onEdit,
     required this.onDelete,
-    required this.onToggleActive,
-    required this.onResetPassword,
   });
 
   @override
@@ -46,11 +40,11 @@ class UserTable extends StatelessWidget {
             AppColors.primary.withValues(alpha: 0.05),
           ),
           columns: const [
-            DataColumn(label: Text(AppStrings.userColumnName)),
             DataColumn(label: Text(AppStrings.userColumnEmail)),
+            DataColumn(label: Text(AppStrings.userColumnName)),
             DataColumn(label: Text(AppStrings.userColumnRole)),
             DataColumn(label: Text(AppStrings.userColumnStatus)),
-            DataColumn(label: Text(AppStrings.userColumnLastLogin)),
+            DataColumn(label: Text(AppStrings.userColumnCreatedAt)),
             DataColumn(label: Text(AppStrings.columnActions)),
           ],
           rows: users.map((user) => _buildRow(user)).toList(),
@@ -62,55 +56,12 @@ class UserTable extends StatelessWidget {
   DataRow _buildRow(CmsUser user) {
     return DataRow(
       cells: [
-        DataCell(_buildNameCell(user)),
         DataCell(Text(user.email)),
+        DataCell(Text(user.name)),
         DataCell(_buildRoleChip(user.role)),
         DataCell(_buildStatusChip(user.isActive)),
-        DataCell(Text(_formatDate(user.lastLoginAt))),
+        DataCell(Text(_formatDate(user.createdAt))),
         DataCell(_buildActions(user)),
-      ],
-    );
-  }
-
-  Widget _buildNameCell(CmsUser user) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          radius: AppDimensions.avatarS / 2,
-          backgroundImage:
-              user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
-          child: user.avatarUrl == null
-              ? Text(
-                  user.fullName.isNotEmpty
-                      ? user.fullName[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(fontSize: 12),
-                )
-              : null,
-        ),
-        const SizedBox(width: AppDimensions.spacingS),
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                user.fullName,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-              Text(
-                '@${user.username}',
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -120,11 +71,8 @@ class UserTable extends StatelessWidget {
     final String label;
 
     switch (role) {
-      case 'super_admin':
-        chipColor = AppColors.error;
-        label = 'Super Admin';
       case 'admin':
-        chipColor = AppColors.primary;
+        chipColor = AppColors.error;
         label = 'Admin';
       case 'editor':
         chipColor = AppColors.success;
@@ -159,7 +107,8 @@ class UserTable extends StatelessWidget {
 
   Widget _buildStatusChip(bool isActive) {
     final chipColor = isActive ? AppColors.success : AppColors.textHint;
-    final label = isActive ? AppStrings.userStatusActive : AppStrings.userStatusInactive;
+    final label =
+        isActive ? AppStrings.userStatusActive : AppStrings.userStatusInactive;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -181,8 +130,7 @@ class UserTable extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return '-';
+  String _formatDate(DateTime date) {
     return DateFormat('dd MMM yyyy, HH:mm').format(date);
   }
 
@@ -195,24 +143,6 @@ class UserTable extends StatelessWidget {
           color: AppColors.primary,
           tooltip: AppStrings.edit,
           onPressed: () => onEdit(user),
-        ),
-        IconButton(
-          icon: Icon(
-            user.isActive ? Icons.block_outlined : Icons.check_circle_outline,
-            size: AppDimensions.iconS,
-          ),
-          color: user.isActive ? AppColors.warning : AppColors.success,
-          tooltip: user.isActive
-              ? AppStrings.userDeactivate
-              : AppStrings.userActivate,
-          onPressed: () => onToggleActive(user),
-        ),
-        IconButton(
-          icon: const Icon(Icons.lock_reset_outlined,
-              size: AppDimensions.iconS),
-          color: AppColors.info,
-          tooltip: AppStrings.userResetPassword,
-          onPressed: () => onResetPassword(user),
         ),
         IconButton(
           icon: const Icon(Icons.delete_outline, size: AppDimensions.iconS),

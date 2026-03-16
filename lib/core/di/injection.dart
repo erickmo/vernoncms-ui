@@ -7,7 +7,9 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/get_remembered_username_usecase.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
+import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/cubit/login_cubit.dart';
+import '../../features/auth/presentation/cubit/register_cubit.dart';
 import '../../features/dashboard/data/datasources/dashboard_remote_datasource.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
 import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
@@ -27,6 +29,7 @@ import '../../features/content/domain/usecases/create_content_usecase.dart';
 import '../../features/content/domain/usecases/delete_content_usecase.dart';
 import '../../features/content/domain/usecases/get_content_detail_usecase.dart';
 import '../../features/content/domain/usecases/get_contents_usecase.dart';
+import '../../features/content/domain/usecases/publish_content_usecase.dart';
 import '../../features/content/domain/usecases/update_content_usecase.dart';
 import '../../features/content/presentation/cubit/content_category_cubit.dart';
 import '../../features/content/presentation/cubit/content_form_cubit.dart';
@@ -80,8 +83,6 @@ import '../../features/user_management/domain/usecases/create_user_usecase.dart'
 import '../../features/user_management/domain/usecases/delete_user_usecase.dart';
 import '../../features/user_management/domain/usecases/get_user_detail_usecase.dart';
 import '../../features/user_management/domain/usecases/get_users_usecase.dart';
-import '../../features/user_management/domain/usecases/reset_user_password_usecase.dart';
-import '../../features/user_management/domain/usecases/toggle_user_active_usecase.dart';
 import '../../features/user_management/domain/usecases/update_user_usecase.dart';
 import '../../features/user_management/presentation/cubit/user_form_cubit.dart';
 import '../../features/user_management/presentation/cubit/user_list_cubit.dart';
@@ -144,12 +145,20 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(
     () => GetRememberedUsernameUseCase(getIt<AuthRepository>()),
   );
+  getIt.registerLazySingleton(
+    () => RegisterUseCase(getIt<AuthRepository>()),
+  );
 
   // Cubit
   getIt.registerFactory(
     () => LoginCubit(
       loginUseCase: getIt<LoginUseCase>(),
       getRememberedUsernameUseCase: getIt<GetRememberedUsernameUseCase>(),
+    ),
+  );
+  getIt.registerFactory(
+    () => RegisterCubit(
+      registerUseCase: getIt<RegisterUseCase>(),
     ),
   );
 
@@ -248,12 +257,16 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(
     () => DeleteContentUseCase(getIt<ContentRepository>()),
   );
+  getIt.registerLazySingleton(
+    () => PublishContentUseCase(getIt<ContentRepository>()),
+  );
 
   // Cubit
   getIt.registerFactory(
     () => ContentListCubit(
       getContentsUseCase: getIt<GetContentsUseCase>(),
       deleteContentUseCase: getIt<DeleteContentUseCase>(),
+      publishContentUseCase: getIt<PublishContentUseCase>(),
     ),
   );
   getIt.registerFactory(
@@ -475,20 +488,12 @@ Future<void> configureDependencies() async {
   getIt.registerLazySingleton(
     () => DeleteUserUseCase(getIt<UserRepository>()),
   );
-  getIt.registerLazySingleton(
-    () => ToggleUserActiveUseCase(getIt<UserRepository>()),
-  );
-  getIt.registerLazySingleton(
-    () => ResetUserPasswordUseCase(getIt<UserRepository>()),
-  );
 
   // Cubit
   getIt.registerFactory(
     () => UserListCubit(
       getUsersUseCase: getIt<GetUsersUseCase>(),
       deleteUserUseCase: getIt<DeleteUserUseCase>(),
-      toggleUserActiveUseCase: getIt<ToggleUserActiveUseCase>(),
-      resetUserPasswordUseCase: getIt<ResetUserPasswordUseCase>(),
     ),
   );
   getIt.registerFactory(

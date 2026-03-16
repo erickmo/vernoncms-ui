@@ -6,6 +6,10 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/di/injection.dart';
+import '../../../core/utils/jwt_decoder.dart';
+import '../../../core/utils/role_guard.dart';
+import '../../../features/auth/data/datasources/auth_local_datasource.dart';
 import '../../../features/domain_builder/domain/entities/domain_definition.dart';
 import '../cubit/sidebar_cubit.dart';
 import 'cms_sidebar_item.dart';
@@ -81,7 +85,21 @@ class CmsSidebar extends StatelessWidget {
         ),
       );
 
+  /// Mendapatkan role user saat ini dari JWT token.
+  String? _getCurrentUserRole() {
+    try {
+      final localDataSource = getIt<AuthLocalDataSource>();
+      final token = localDataSource.getAccessToken();
+      if (token == null) return null;
+      return JwtDecoder.getRole(token);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Widget _buildMenuItems(BuildContext context, SidebarState state) {
+    final currentRole = _getCurrentUserRole();
+
     // Group domains by sidebarSection.
     final domainsBySection = <String, List<DomainDefinition>>{};
     for (final domain in state.domains) {
@@ -246,14 +264,16 @@ class CmsSidebar extends StatelessWidget {
               isCollapsed: state.isCollapsed,
               onTap: () => _navigateTo(context, '/domain-builder'),
             ),
-            const SizedBox(height: AppDimensions.spacingXS),
-            CmsSidebarItem(
-              icon: Icons.people_outlined,
-              label: AppStrings.menuUserManagement,
-              isActive: state.activeRoute == '/users',
-              isCollapsed: state.isCollapsed,
-              onTap: () => _navigateTo(context, '/users'),
-            ),
+            if (RoleGuard.canManageUsers(currentRole)) ...[
+              const SizedBox(height: AppDimensions.spacingXS),
+              CmsSidebarItem(
+                icon: Icons.people_outlined,
+                label: AppStrings.menuUserManagement,
+                isActive: state.activeRoute == '/users',
+                isCollapsed: state.isCollapsed,
+                onTap: () => _navigateTo(context, '/users'),
+              ),
+            ],
             const SizedBox(height: AppDimensions.spacingXS),
             CmsSidebarItem(
               icon: Icons.settings_outlined,

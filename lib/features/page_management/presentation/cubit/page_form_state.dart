@@ -18,9 +18,7 @@ sealed class PageFormState with _$PageFormState {
   const factory PageFormState.saving() = PageFormSaving;
 
   /// Halaman berhasil disimpan.
-  const factory PageFormState.saved({
-    required PageEntity page,
-  }) = PageFormSaved;
+  const factory PageFormState.saved() = PageFormSaved;
 
   /// Gagal memuat atau menyimpan.
   const factory PageFormState.error(String message) = PageFormError;

@@ -39,11 +39,6 @@ class ContentCategoryTable extends StatelessWidget {
           columns: const [
             DataColumn(label: Text(AppStrings.columnName)),
             DataColumn(label: Text(AppStrings.columnSlug)),
-            DataColumn(
-              label: Text(AppStrings.columnContentCount),
-              numeric: true,
-            ),
-            DataColumn(label: Text(AppStrings.columnVisible)),
             DataColumn(label: Text(AppStrings.columnActions)),
           ],
           rows: categories.map((category) => _buildRow(category)).toList(),
@@ -55,64 +50,15 @@ class ContentCategoryTable extends StatelessWidget {
   DataRow _buildRow(ContentCategory category) {
     return DataRow(
       cells: [
-        DataCell(_buildNameCell(category)),
-        DataCell(Text(category.slug)),
-        DataCell(Text('${category.contentCount}')),
-        DataCell(_buildVisibilityChip(category.isVisible)),
-        DataCell(_buildActions(category)),
-      ],
-    );
-  }
-
-  Widget _buildNameCell(ContentCategory category) {
-    final hasParent = category.parentCategoryId != null;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (hasParent)
-          const Padding(
-            padding: EdgeInsets.only(right: AppDimensions.spacingS),
-            child: Text(
-              '  \u2514 ',
-              style: TextStyle(color: AppColors.textHint),
-            ),
-          ),
-        if (category.icon != null && category.icon!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(right: AppDimensions.spacingS),
-            child: Text(category.icon!),
-          ),
-        Flexible(
-          child: Text(
+        DataCell(
+          Text(
             category.name,
-            overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
         ),
+        DataCell(Text(category.slug)),
+        DataCell(_buildActions(category)),
       ],
-    );
-  }
-
-  Widget _buildVisibilityChip(bool isVisible) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.spacingS,
-        vertical: AppDimensions.spacingXS,
-      ),
-      decoration: BoxDecoration(
-        color: isVisible
-            ? AppColors.success.withValues(alpha: 0.1)
-            : AppColors.textHint.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusS),
-      ),
-      child: Text(
-        isVisible ? AppStrings.visible : AppStrings.hidden,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: isVisible ? AppColors.success : AppColors.textHint,
-        ),
-      ),
     );
   }
 

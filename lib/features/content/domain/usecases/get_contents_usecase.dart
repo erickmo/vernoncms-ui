@@ -14,16 +14,14 @@ class GetContentsUseCase {
   Future<Either<Failure, List<Content>>> call({
     String? search,
     String? status,
-    String? categoryId,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) {
     return _repository.getContents(
       search: search,
       status: status,
-      categoryId: categoryId,
       page: page,
-      perPage: perPage,
+      limit: limit,
     );
   }
 }

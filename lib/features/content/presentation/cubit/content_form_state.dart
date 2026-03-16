@@ -18,9 +18,7 @@ sealed class ContentFormState with _$ContentFormState {
   const factory ContentFormState.saving() = ContentFormSaving;
 
   /// Konten berhasil disimpan.
-  const factory ContentFormState.saved({
-    required Content content,
-  }) = ContentFormSaved;
+  const factory ContentFormState.saved() = ContentFormSaved;
 
   /// Gagal memuat atau menyimpan data.
   const factory ContentFormState.error(String message) = ContentFormError;

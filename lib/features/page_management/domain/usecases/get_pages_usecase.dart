@@ -13,15 +13,13 @@ class GetPagesUseCase {
   /// Returns [Right(List<PageEntity>)] jika berhasil.
   Future<Either<Failure, List<PageEntity>>> call({
     String? search,
-    String? status,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) {
     return _repository.getPages(
       search: search,
-      status: status,
       page: page,
-      perPage: perPage,
+      limit: limit,
     );
   }
 }

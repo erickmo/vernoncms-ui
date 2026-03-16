@@ -10,8 +10,8 @@ class UpdateContentUseCase {
 
   const UpdateContentUseCase(this._repository);
 
-  /// Returns [Right(Content)] jika berhasil.
-  Future<Either<Failure, Content>> call(Content content) {
+  /// Returns [Right(void)] jika berhasil.
+  Future<Either<Failure, void>> call(Content content) {
     return _repository.updateContent(content);
   }
 }

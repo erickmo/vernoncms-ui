@@ -6,21 +6,21 @@ import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../cubit/login_cubit.dart';
 
-/// Form login dengan field username, password, remember me, dan forgot password.
+/// Form login dengan field email, password, remember me, dan link ke register.
 class LoginForm extends StatefulWidget {
-  /// Callback saat user tap "Lupa Password?".
-  final VoidCallback? onForgotPassword;
+  /// Callback saat user tap "Daftar Akun Baru".
+  final VoidCallback? onRegister;
 
-  /// Username yang sudah tersimpan dari remember me.
-  final String initialUsername;
+  /// Email yang sudah tersimpan dari remember me.
+  final String initialEmail;
 
   /// Apakah remember me aktif dari sebelumnya.
   final bool initialRememberMe;
 
   const LoginForm({
     super.key,
-    this.onForgotPassword,
-    this.initialUsername = '',
+    this.onRegister,
+    this.initialEmail = '',
     this.initialRememberMe = false,
   });
 
@@ -30,7 +30,7 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _usernameController;
+  late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   late bool _rememberMe;
   bool _obscurePassword = true;
@@ -38,14 +38,14 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: widget.initialUsername);
+    _emailController = TextEditingController(text: widget.initialEmail);
     _passwordController = TextEditingController();
     _rememberMe = widget.initialRememberMe;
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -57,29 +57,35 @@ class _LoginFormState extends State<LoginForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildUsernameField(),
+          _buildEmailField(),
           const SizedBox(height: AppDimensions.spacingM),
           _buildPasswordField(),
           const SizedBox(height: AppDimensions.spacingS),
-          _buildRememberAndForgot(),
+          _buildRememberMe(),
           const SizedBox(height: AppDimensions.spacingL),
           _buildLoginButton(context),
+          const SizedBox(height: AppDimensions.spacingM),
+          _buildRegisterLink(),
         ],
       ),
     );
   }
 
-  Widget _buildUsernameField() => TextFormField(
-        controller: _usernameController,
+  Widget _buildEmailField() => TextFormField(
+        controller: _emailController,
         decoration: const InputDecoration(
-          labelText: AppStrings.usernameLabel,
-          hintText: AppStrings.usernameHint,
-          prefixIcon: Icon(Icons.person_outline),
+          labelText: AppStrings.emailLabel,
+          hintText: AppStrings.emailHint,
+          prefixIcon: Icon(Icons.email_outlined),
         ),
+        keyboardType: TextInputType.emailAddress,
         textInputAction: TextInputAction.next,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return AppStrings.usernameRequired;
+            return AppStrings.emailRequired;
+          }
+          if (!value.contains('@')) {
+            return AppStrings.emailInvalid;
           }
           return null;
         },
@@ -111,7 +117,7 @@ class _LoginFormState extends State<LoginForm> {
         },
       );
 
-  Widget _buildRememberAndForgot() => Row(
+  Widget _buildRememberMe() => Row(
         children: [
           SizedBox(
             height: AppDimensions.buttonHeightS,
@@ -123,11 +129,6 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
           const Text(AppStrings.rememberMe),
-          const Spacer(),
-          TextButton(
-            onPressed: widget.onForgotPassword,
-            child: const Text(AppStrings.forgotPassword),
-          ),
         ],
       );
 
@@ -149,10 +150,21 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
+  Widget _buildRegisterLink() => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(AppStrings.noAccount),
+          TextButton(
+            onPressed: widget.onRegister,
+            child: const Text(AppStrings.registerLink),
+          ),
+        ],
+      );
+
   void _onSubmit(BuildContext context) {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<LoginCubit>().login(
-            username: _usernameController.text.trim(),
+            email: _emailController.text.trim(),
             password: _passwordController.text,
             rememberMe: _rememberMe,
           );

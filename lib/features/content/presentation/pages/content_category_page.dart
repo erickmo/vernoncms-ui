@@ -24,21 +24,8 @@ class ContentCategoryPage extends StatelessWidget {
   }
 }
 
-class _ContentCategoryView extends StatefulWidget {
+class _ContentCategoryView extends StatelessWidget {
   const _ContentCategoryView();
-
-  @override
-  State<_ContentCategoryView> createState() => _ContentCategoryViewState();
-}
-
-class _ContentCategoryViewState extends State<_ContentCategoryView> {
-  final _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +34,8 @@ class _ContentCategoryViewState extends State<_ContentCategoryView> {
       builder: (context, state) => state.when(
         initial: () => const SizedBox.shrink(),
         loading: () => const Center(child: CircularProgressIndicator()),
-        loaded: (categories, searchQuery) =>
-            _buildContent(context, categories, searchQuery),
+        loaded: (categories) =>
+            _buildContent(context, categories),
         error: (message) => _buildError(context, message),
       ),
     );
@@ -68,7 +55,6 @@ class _ContentCategoryViewState extends State<_ContentCategoryView> {
   Widget _buildContent(
     BuildContext context,
     List<ContentCategory> categories,
-    String searchQuery,
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppDimensions.spacingL),
@@ -77,14 +63,11 @@ class _ContentCategoryViewState extends State<_ContentCategoryView> {
         children: [
           _buildHeader(context),
           const SizedBox(height: AppDimensions.spacingL),
-          _buildSearchBar(context),
-          const SizedBox(height: AppDimensions.spacingM),
           ContentCategoryTable(
             categories: categories,
             onEdit: (category) => _showFormDialog(
               context,
               category: category,
-              allCategories: categories,
             ),
             onDelete: (category) => _showDeleteDialog(context, category),
           ),
@@ -106,13 +89,7 @@ class _ContentCategoryViewState extends State<_ContentCategoryView> {
           ),
         ),
         ElevatedButton.icon(
-          onPressed: () {
-            final state = context.read<ContentCategoryCubit>().state;
-            final allCategories = state is ContentCategoryLoaded
-                ? state.categories
-                : <ContentCategory>[];
-            _showFormDialog(context, allCategories: allCategories);
-          },
+          onPressed: () => _showFormDialog(context),
           icon: const Icon(Icons.add),
           label: const Text(AppStrings.addCategory),
         ),
@@ -120,46 +97,14 @@ class _ContentCategoryViewState extends State<_ContentCategoryView> {
     );
   }
 
-  Widget _buildSearchBar(BuildContext context) {
-    return SizedBox(
-      width: 360,
-      child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: AppStrings.searchCategory,
-          prefixIcon: const Icon(Icons.search),
-          border: const OutlineInputBorder(),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    context
-                        .read<ContentCategoryCubit>()
-                        .loadCategories();
-                  },
-                )
-              : null,
-        ),
-        onSubmitted: (value) {
-          context
-              .read<ContentCategoryCubit>()
-              .loadCategories(search: value.isNotEmpty ? value : null);
-        },
-      ),
-    );
-  }
-
   void _showFormDialog(
     BuildContext context, {
     ContentCategory? category,
-    required List<ContentCategory> allCategories,
   }) {
     final cubit = context.read<ContentCategoryCubit>();
     ContentCategoryFormDialog.show(
       context: context,
       category: category,
-      availableParents: allCategories,
       onSave: (updatedCategory) {
         if (category != null) {
           cubit.updateCategory(updatedCategory);

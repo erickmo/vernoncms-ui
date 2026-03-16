@@ -29,9 +29,9 @@ class LoginUseCase {
 
         // Handle remember me
         if (params.rememberMe) {
-          await _repository.saveRememberedUsername(params.username);
+          await _repository.saveRememberedEmail(params.email);
         } else {
-          await _repository.clearRememberedUsername();
+          await _repository.clearRememberedEmail();
         }
 
         return Right(token);

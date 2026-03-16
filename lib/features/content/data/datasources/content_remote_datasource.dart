@@ -1,20 +1,20 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/paginated_response.dart';
 import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../models/content_model.dart';
 
 /// Datasource remote untuk konten.
 abstract class ContentRemoteDataSource {
-  /// Ambil daftar konten.
+  /// Ambil daftar konten dengan pagination.
   ///
   /// Throws [ServerException] jika gagal.
-  Future<List<ContentModel>> getContents({
+  Future<PaginatedResponse<ContentModel>> getContents({
     String? search,
     String? status,
-    String? categoryId,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   });
 
   /// Ambil detail konten berdasarkan [id].
@@ -22,18 +22,25 @@ abstract class ContentRemoteDataSource {
   /// Throws [ServerException] jika gagal.
   Future<ContentModel> getContentById(String id);
 
+  /// Ambil konten berdasarkan [slug].
+  ///
+  /// Throws [ServerException] jika gagal.
+  Future<ContentModel> getContentBySlug(String slug);
+
   /// Buat konten baru.
   ///
   /// Throws [ServerException] jika gagal.
-  Future<ContentModel> createContent(Map<String, dynamic> data);
+  Future<void> createContent(Map<String, dynamic> data);
 
   /// Perbarui konten yang sudah ada.
   ///
   /// Throws [ServerException] jika gagal.
-  Future<ContentModel> updateContent(
-    String id,
-    Map<String, dynamic> data,
-  );
+  Future<void> updateContent(String id, Map<String, dynamic> data);
+
+  /// Publikasikan konten (draft -> published).
+  ///
+  /// Throws [ServerException] jika gagal.
+  Future<void> publishContent(String id);
 
   /// Hapus konten berdasarkan [id].
   ///
@@ -48,17 +55,16 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   const ContentRemoteDataSourceImpl(this._apiClient);
 
   @override
-  Future<List<ContentModel>> getContents({
+  Future<PaginatedResponse<ContentModel>> getContents({
     String? search,
     String? status,
-    String? categoryId,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) async {
     try {
       final queryParameters = <String, dynamic>{
         'page': page,
-        'per_page': perPage,
+        'limit': limit,
       };
       if (search != null && search.isNotEmpty) {
         queryParameters['search'] = search;
@@ -66,19 +72,14 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       if (status != null && status.isNotEmpty) {
         queryParameters['status'] = status;
       }
-      if (categoryId != null && categoryId.isNotEmpty) {
-        queryParameters['category_id'] = categoryId;
-      }
 
       final response = await _apiClient.dio.get(
-        '/api/contents',
+        '/api/v1/contents',
         queryParameters: queryParameters,
       );
 
-      final list = response.data as List<dynamic>;
-      return list
-          .map((e) => ContentModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final data = response.data['data'] as Map<String, dynamic>;
+      return PaginatedResponse.fromJson(data, ContentModel.fromJson);
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -90,11 +91,37 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   @override
   Future<ContentModel> getContentById(String id) async {
     try {
-      final response = await _apiClient.dio.get(
-        '/api/contents/$id',
+      final response = await _apiClient.dio.get('/api/v1/contents/$id');
+      final data = response.data['data'] as Map<String, dynamic>;
+      return ContentModel.fromJson(data);
+    } on DioException catch (e) {
+      throw ServerException(
+        _extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
       );
-      return ContentModel.fromJson(
-        response.data as Map<String, dynamic>,
+    }
+  }
+
+  @override
+  Future<ContentModel> getContentBySlug(String slug) async {
+    try {
+      final response = await _apiClient.dio.get('/api/v1/contents/slug/$slug');
+      final data = response.data['data'] as Map<String, dynamic>;
+      return ContentModel.fromJson(data);
+    } on DioException catch (e) {
+      throw ServerException(
+        _extractErrorMessage(e),
+        statusCode: e.response?.statusCode,
+      );
+    }
+  }
+
+  @override
+  Future<void> createContent(Map<String, dynamic> data) async {
+    try {
+      await _apiClient.dio.post(
+        '/api/v1/contents',
+        data: data,
       );
     } on DioException catch (e) {
       throw ServerException(
@@ -105,16 +132,11 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   }
 
   @override
-  Future<ContentModel> createContent(
-    Map<String, dynamic> data,
-  ) async {
+  Future<void> updateContent(String id, Map<String, dynamic> data) async {
     try {
-      final response = await _apiClient.dio.post(
-        '/api/contents',
+      await _apiClient.dio.put(
+        '/api/v1/contents/$id',
         data: data,
-      );
-      return ContentModel.fromJson(
-        response.data as Map<String, dynamic>,
       );
     } on DioException catch (e) {
       throw ServerException(
@@ -125,18 +147,9 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   }
 
   @override
-  Future<ContentModel> updateContent(
-    String id,
-    Map<String, dynamic> data,
-  ) async {
+  Future<void> publishContent(String id) async {
     try {
-      final response = await _apiClient.dio.put(
-        '/api/contents/$id',
-        data: data,
-      );
-      return ContentModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
+      await _apiClient.dio.put('/api/v1/contents/$id/publish');
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -148,7 +161,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   @override
   Future<void> deleteContent(String id) async {
     try {
-      await _apiClient.dio.delete('/api/contents/$id');
+      await _apiClient.dio.delete('/api/v1/contents/$id');
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -160,8 +173,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   String _extractErrorMessage(DioException e) {
     final data = e.response?.data;
     if (data is Map<String, dynamic>) {
-      return data['message'] as String? ??
-          data['error'] as String? ??
+      return data['error'] as String? ??
+          data['message'] as String? ??
           'Terjadi kesalahan pada server';
     }
     return e.message ?? 'Terjadi kesalahan pada server';

@@ -3,11 +3,15 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../entities/auth_token.dart';
 import '../entities/login_params.dart';
+import '../entities/register_params.dart';
 
 /// Interface repository untuk autentikasi.
 abstract class AuthRepository {
-  /// Login dengan username dan password.
+  /// Login dengan email dan password.
   Future<Either<Failure, AuthToken>> login(LoginParams params);
+
+  /// Register user baru dengan email, password, dan name.
+  Future<Either<Failure, void>> register(RegisterParams params);
 
   /// Simpan token ke local storage.
   Future<Either<Failure, void>> saveToken(AuthToken token);
@@ -18,12 +22,12 @@ abstract class AuthRepository {
   /// Hapus token (logout).
   Future<Either<Failure, void>> clearToken();
 
-  /// Simpan username untuk remember me.
-  Future<Either<Failure, void>> saveRememberedUsername(String username);
+  /// Simpan email untuk remember me.
+  Future<Either<Failure, void>> saveRememberedEmail(String email);
 
-  /// Ambil username yang disimpan dari remember me.
-  Future<Either<Failure, String?>> getRememberedUsername();
+  /// Ambil email yang disimpan dari remember me.
+  Future<Either<Failure, String?>> getRememberedEmail();
 
-  /// Hapus username yang disimpan.
-  Future<Either<Failure, void>> clearRememberedUsername();
+  /// Hapus email yang disimpan.
+  Future<Either<Failure, void>> clearRememberedEmail();
 }

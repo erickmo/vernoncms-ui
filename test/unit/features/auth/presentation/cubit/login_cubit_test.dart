@@ -20,7 +20,7 @@ class FakeLoginParams extends Fake implements LoginParams {}
 void main() {
   late LoginCubit cubit;
   late MockLoginUseCase mockLoginUseCase;
-  late MockGetRememberedUsernameUseCase mockGetRememberedUsername;
+  late MockGetRememberedUsernameUseCase mockGetRememberedEmail;
 
   setUpAll(() {
     registerFallbackValue(FakeLoginParams());
@@ -28,10 +28,10 @@ void main() {
 
   setUp(() {
     mockLoginUseCase = MockLoginUseCase();
-    mockGetRememberedUsername = MockGetRememberedUsernameUseCase();
+    mockGetRememberedEmail = MockGetRememberedUsernameUseCase();
     cubit = LoginCubit(
       loginUseCase: mockLoginUseCase,
-      getRememberedUsernameUseCase: mockGetRememberedUsername,
+      getRememberedUsernameUseCase: mockGetRememberedEmail,
     );
   });
 
@@ -40,7 +40,7 @@ void main() {
   const tToken = AuthToken(
     accessToken: 'access_123',
     refreshToken: 'refresh_123',
-    expiresIn: 3600,
+    expiresAt: 1710600000,
   );
 
   group('LoginCubit', () {
@@ -57,7 +57,7 @@ void main() {
           return cubit;
         },
         act: (cubit) => cubit.login(
-          username: 'admin',
+          email: 'admin@example.com',
           password: 'password',
           rememberMe: false,
         ),
@@ -72,48 +72,48 @@ void main() {
         build: () {
           when(() => mockLoginUseCase(any())).thenAnswer(
             (_) async => const Left(
-              ServerFailure('Username atau password salah', statusCode: 401),
+              ServerFailure('Email atau password salah', statusCode: 401),
             ),
           );
           return cubit;
         },
         act: (cubit) => cubit.login(
-          username: 'admin',
+          email: 'admin@example.com',
           password: 'wrong',
           rememberMe: false,
         ),
         expect: () => [
           const LoginState.loading(),
-          const LoginState.error('Username atau password salah'),
+          const LoginState.error('Email atau password salah'),
         ],
       );
     });
 
-    group('loadRememberedUsername', () {
+    group('loadRememberedEmail', () {
       blocTest<LoginCubit, LoginState>(
-        'emits initial with username when remembered username ada',
+        'emits initial with email when remembered email ada',
         build: () {
-          when(() => mockGetRememberedUsername())
-              .thenAnswer((_) async => const Right('admin'));
+          when(() => mockGetRememberedEmail())
+              .thenAnswer((_) async => const Right('admin@example.com'));
           return cubit;
         },
-        act: (cubit) => cubit.loadRememberedUsername(),
+        act: (cubit) => cubit.loadRememberedEmail(),
         expect: () => [
           const LoginState.initial(
-            rememberedUsername: 'admin',
+            rememberedEmail: 'admin@example.com',
             rememberMe: true,
           ),
         ],
       );
 
       blocTest<LoginCubit, LoginState>(
-        'tidak emit state baru when remembered username kosong',
+        'tidak emit state baru when remembered email kosong',
         build: () {
-          when(() => mockGetRememberedUsername())
+          when(() => mockGetRememberedEmail())
               .thenAnswer((_) async => const Right(null));
           return cubit;
         },
-        act: (cubit) => cubit.loadRememberedUsername(),
+        act: (cubit) => cubit.loadRememberedEmail(),
         expect: () => <LoginState>[],
       );
     });

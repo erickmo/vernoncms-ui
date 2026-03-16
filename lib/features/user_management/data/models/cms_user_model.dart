@@ -5,35 +5,26 @@ import '../../domain/entities/cms_user.dart';
 part 'cms_user_model.g.dart';
 
 /// Model response user dari API.
+///
+/// API response di-wrap dalam `{ "data": { ... } }`.
+/// List response: `{ "data": { "items": [...], "total", "page", "limit" } }`.
 @JsonSerializable()
 class CmsUserModel {
   /// ID unik user.
   final String id;
 
-  /// Username untuk login.
-  final String username;
-
   /// Alamat email.
   final String email;
 
-  /// Nama lengkap.
-  @JsonKey(name: 'full_name')
-  final String fullName;
+  /// Nama user.
+  final String name;
 
-  /// URL avatar.
-  @JsonKey(name: 'avatar_url')
-  final String? avatarUrl;
-
-  /// Role user.
+  /// Role user (admin, editor, viewer).
   final String role;
 
   /// Apakah user aktif.
   @JsonKey(name: 'is_active')
   final bool isActive;
-
-  /// Tanggal login terakhir.
-  @JsonKey(name: 'last_login_at')
-  final DateTime? lastLoginAt;
 
   /// Tanggal dibuat.
   @JsonKey(name: 'created_at')
@@ -45,13 +36,10 @@ class CmsUserModel {
 
   const CmsUserModel({
     required this.id,
-    required this.username,
     required this.email,
-    required this.fullName,
-    this.avatarUrl,
+    required this.name,
     required this.role,
     this.isActive = true,
-    this.lastLoginAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -66,13 +54,10 @@ class CmsUserModel {
   /// Convert ke domain entity.
   CmsUser toEntity() => CmsUser(
         id: id,
-        username: username,
         email: email,
-        fullName: fullName,
-        avatarUrl: avatarUrl,
+        name: name,
         role: role,
         isActive: isActive,
-        lastLoginAt: lastLoginAt,
         createdAt: createdAt,
         updatedAt: updatedAt,
       );
@@ -81,13 +66,10 @@ class CmsUserModel {
   factory CmsUserModel.fromEntity(CmsUser entity) {
     return CmsUserModel(
       id: entity.id,
-      username: entity.username,
       email: entity.email,
-      fullName: entity.fullName,
-      avatarUrl: entity.avatarUrl,
+      name: entity.name,
       role: entity.role,
       isActive: entity.isActive,
-      lastLoginAt: entity.lastLoginAt,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     );

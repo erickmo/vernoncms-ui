@@ -5,14 +5,14 @@ part 'login_request_model.g.dart';
 /// Model request untuk API login.
 @JsonSerializable()
 class LoginRequestModel {
-  /// Username untuk login.
-  final String username;
+  /// Email untuk login.
+  final String email;
 
   /// Password untuk login.
   final String password;
 
   const LoginRequestModel({
-    required this.username,
+    required this.email,
     required this.password,
   });
 

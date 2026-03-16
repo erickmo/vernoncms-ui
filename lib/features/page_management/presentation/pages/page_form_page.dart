@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -45,54 +47,11 @@ class _PageFormView extends StatefulWidget {
 class _PageFormViewState extends State<_PageFormView> {
   final _formKey = GlobalKey<FormState>();
 
-  // Content controllers
-  late final TextEditingController _titleController;
-  late final TextEditingController _pageKeyController;
+  late final TextEditingController _nameController;
   late final TextEditingController _slugController;
-  late final TextEditingController _captionController;
-  late final TextEditingController _bodyController;
+  late final TextEditingController _variablesController;
 
-  // Hero controllers
-  late final TextEditingController _heroTitleController;
-  late final TextEditingController _heroSubtitleController;
-  late final TextEditingController _heroImageUrlController;
-  late final TextEditingController _heroCtaTextController;
-  late final TextEditingController _heroCtaUrlController;
-
-  // SEO controllers
-  late final TextEditingController _metaTitleController;
-  late final TextEditingController _metaDescriptionController;
-  late final TextEditingController _metaKeywordsController;
-  late final TextEditingController _ogTitleController;
-  late final TextEditingController _ogDescriptionController;
-  late final TextEditingController _ogImageUrlController;
-
-  // Layout controllers
-  late final TextEditingController _customCssController;
-
-  // Navigation controllers
-  late final TextEditingController _navLabelController;
-  late final TextEditingController _sortOrderController;
-  late final TextEditingController _parentPageIdController;
-
-  // Featured Image controllers
-  late final TextEditingController _featuredImageUrlController;
-  late final TextEditingController _featuredImageAltController;
-
-  // Redirect controllers
-  late final TextEditingController _redirectUrlController;
-
-  // State fields
-  bool _noIndex = false;
-  bool _noFollow = false;
-  String? _template;
-  bool _showHeader = true;
-  bool _showFooter = true;
-  bool _showBreadcrumbs = true;
-  String _status = 'draft';
-  String _visibility = 'public';
-  bool _showInNav = true;
-  String? _redirectType;
+  bool _isActive = true;
   bool _autoSlug = true;
   bool _initialized = false;
 
@@ -101,31 +60,11 @@ class _PageFormViewState extends State<_PageFormView> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController();
-    _pageKeyController = TextEditingController();
+    _nameController = TextEditingController();
     _slugController = TextEditingController();
-    _captionController = TextEditingController();
-    _bodyController = TextEditingController();
-    _heroTitleController = TextEditingController();
-    _heroSubtitleController = TextEditingController();
-    _heroImageUrlController = TextEditingController();
-    _heroCtaTextController = TextEditingController();
-    _heroCtaUrlController = TextEditingController();
-    _metaTitleController = TextEditingController();
-    _metaDescriptionController = TextEditingController();
-    _metaKeywordsController = TextEditingController();
-    _ogTitleController = TextEditingController();
-    _ogDescriptionController = TextEditingController();
-    _ogImageUrlController = TextEditingController();
-    _customCssController = TextEditingController();
-    _navLabelController = TextEditingController();
-    _sortOrderController = TextEditingController(text: '0');
-    _parentPageIdController = TextEditingController();
-    _featuredImageUrlController = TextEditingController();
-    _featuredImageAltController = TextEditingController();
-    _redirectUrlController = TextEditingController();
+    _variablesController = TextEditingController(text: '{}');
 
-    _titleController.addListener(_onTitleChanged);
+    _nameController.addListener(_onNameChanged);
 
     if (!_isEditing) {
       _initialized = true;
@@ -134,35 +73,15 @@ class _PageFormViewState extends State<_PageFormView> {
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _pageKeyController.dispose();
+    _nameController.dispose();
     _slugController.dispose();
-    _captionController.dispose();
-    _bodyController.dispose();
-    _heroTitleController.dispose();
-    _heroSubtitleController.dispose();
-    _heroImageUrlController.dispose();
-    _heroCtaTextController.dispose();
-    _heroCtaUrlController.dispose();
-    _metaTitleController.dispose();
-    _metaDescriptionController.dispose();
-    _metaKeywordsController.dispose();
-    _ogTitleController.dispose();
-    _ogDescriptionController.dispose();
-    _ogImageUrlController.dispose();
-    _customCssController.dispose();
-    _navLabelController.dispose();
-    _sortOrderController.dispose();
-    _parentPageIdController.dispose();
-    _featuredImageUrlController.dispose();
-    _featuredImageAltController.dispose();
-    _redirectUrlController.dispose();
+    _variablesController.dispose();
     super.dispose();
   }
 
-  void _onTitleChanged() {
+  void _onNameChanged() {
     if (_autoSlug) {
-      _slugController.text = _generateSlug(_titleController.text);
+      _slugController.text = _generateSlug(_nameController.text);
     }
   }
 
@@ -176,41 +95,19 @@ class _PageFormViewState extends State<_PageFormView> {
   }
 
   void _populateFields(PageEntity page) {
-    _titleController.text = page.title;
-    _pageKeyController.text = page.pageKey;
+    _nameController.text = page.name;
     _slugController.text = page.slug;
-    _captionController.text = page.caption ?? '';
-    _bodyController.text = page.body ?? '';
-    _heroTitleController.text = page.heroTitle ?? '';
-    _heroSubtitleController.text = page.heroSubtitle ?? '';
-    _heroImageUrlController.text = page.heroImageUrl ?? '';
-    _heroCtaTextController.text = page.heroCtaText ?? '';
-    _heroCtaUrlController.text = page.heroCtaUrl ?? '';
-    _metaTitleController.text = page.metaTitle ?? '';
-    _metaDescriptionController.text = page.metaDescription ?? '';
-    _metaKeywordsController.text = page.metaKeywords.join(', ');
-    _ogTitleController.text = page.ogTitle ?? '';
-    _ogDescriptionController.text = page.ogDescription ?? '';
-    _ogImageUrlController.text = page.ogImageUrl ?? '';
-    _customCssController.text = page.customCss ?? '';
-    _navLabelController.text = page.navLabel ?? '';
-    _sortOrderController.text = '${page.sortOrder}';
-    _parentPageIdController.text = page.parentPageId ?? '';
-    _featuredImageUrlController.text = page.featuredImageUrl ?? '';
-    _featuredImageAltController.text = page.featuredImageAlt ?? '';
-    _redirectUrlController.text = page.redirectUrl ?? '';
+
+    // Prettify variables JSON.
+    try {
+      const encoder = JsonEncoder.withIndent('  ');
+      _variablesController.text = encoder.convert(page.variables);
+    } catch (_) {
+      _variablesController.text = '{}';
+    }
 
     setState(() {
-      _noIndex = page.noIndex;
-      _noFollow = page.noFollow;
-      _template = page.template;
-      _showHeader = page.showHeader;
-      _showFooter = page.showFooter;
-      _showBreadcrumbs = page.showBreadcrumbs;
-      _status = page.status;
-      _visibility = page.visibility;
-      _showInNav = page.showInNav;
-      _redirectType = page.redirectType;
+      _isActive = page.isActive;
       _autoSlug = false;
       _initialized = true;
     });
@@ -219,13 +116,33 @@ class _PageFormViewState extends State<_PageFormView> {
   void _onSave() {
     if (!_formKey.currentState!.validate()) return;
 
+    // Parse variables JSON.
+    Map<String, dynamic> variables;
+    try {
+      final parsed = json.decode(_variablesController.text.trim());
+      if (parsed is Map<String, dynamic>) {
+        variables = parsed;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.pageVariablesInvalid),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.pageVariablesInvalid),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     final cubit = context.read<PageFormCubit>();
     final now = DateTime.now();
-
-    final keywordsText = _metaKeywordsController.text.trim();
-    final metaKeywords = keywordsText.isEmpty
-        ? <String>[]
-        : keywordsText.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
     // Dapatkan halaman lama dari state jika sedang edit.
     PageEntity? existingPage;
@@ -236,78 +153,10 @@ class _PageFormViewState extends State<_PageFormView> {
 
     final pageEntity = PageEntity(
       id: existingPage?.id ?? '',
-      pageKey: _pageKeyController.text.trim(),
-      title: _titleController.text.trim(),
+      name: _nameController.text.trim(),
       slug: _slugController.text.trim(),
-      caption: _captionController.text.trim().isEmpty
-          ? null
-          : _captionController.text.trim(),
-      body: _bodyController.text.trim().isEmpty
-          ? null
-          : _bodyController.text.trim(),
-      heroTitle: _heroTitleController.text.trim().isEmpty
-          ? null
-          : _heroTitleController.text.trim(),
-      heroSubtitle: _heroSubtitleController.text.trim().isEmpty
-          ? null
-          : _heroSubtitleController.text.trim(),
-      heroImageUrl: _heroImageUrlController.text.trim().isEmpty
-          ? null
-          : _heroImageUrlController.text.trim(),
-      heroCtaText: _heroCtaTextController.text.trim().isEmpty
-          ? null
-          : _heroCtaTextController.text.trim(),
-      heroCtaUrl: _heroCtaUrlController.text.trim().isEmpty
-          ? null
-          : _heroCtaUrlController.text.trim(),
-      metaTitle: _metaTitleController.text.trim().isEmpty
-          ? null
-          : _metaTitleController.text.trim(),
-      metaDescription: _metaDescriptionController.text.trim().isEmpty
-          ? null
-          : _metaDescriptionController.text.trim(),
-      metaKeywords: metaKeywords,
-      ogTitle: _ogTitleController.text.trim().isEmpty
-          ? null
-          : _ogTitleController.text.trim(),
-      ogDescription: _ogDescriptionController.text.trim().isEmpty
-          ? null
-          : _ogDescriptionController.text.trim(),
-      ogImageUrl: _ogImageUrlController.text.trim().isEmpty
-          ? null
-          : _ogImageUrlController.text.trim(),
-      noIndex: _noIndex,
-      noFollow: _noFollow,
-      template: _template,
-      showHeader: _showHeader,
-      showFooter: _showFooter,
-      showBreadcrumbs: _showBreadcrumbs,
-      customCss: _customCssController.text.trim().isEmpty
-          ? null
-          : _customCssController.text.trim(),
-      status: _status,
-      visibility: _visibility,
-      parentPageId: _parentPageIdController.text.trim().isEmpty
-          ? null
-          : _parentPageIdController.text.trim(),
-      sortOrder: int.tryParse(_sortOrderController.text) ?? 0,
-      showInNav: _showInNav,
-      navLabel: _navLabelController.text.trim().isEmpty
-          ? null
-          : _navLabelController.text.trim(),
-      featuredImageUrl: _featuredImageUrlController.text.trim().isEmpty
-          ? null
-          : _featuredImageUrlController.text.trim(),
-      featuredImageAlt: _featuredImageAltController.text.trim().isEmpty
-          ? null
-          : _featuredImageAltController.text.trim(),
-      redirectUrl: _redirectUrlController.text.trim().isEmpty
-          ? null
-          : _redirectUrlController.text.trim(),
-      redirectType: _redirectType,
-      publishedAt: _status == 'published'
-          ? (existingPage?.publishedAt ?? now)
-          : existingPage?.publishedAt,
+      variables: variables,
+      isActive: _isActive,
       createdAt: existingPage?.createdAt ?? now,
       updatedAt: now,
     );
@@ -336,7 +185,7 @@ class _PageFormViewState extends State<_PageFormView> {
             return _buildForm(context, isSaving: false);
           },
           saving: () => _buildForm(context, isSaving: true),
-          saved: (_) => _buildForm(context, isSaving: false),
+          saved: () => _buildForm(context, isSaving: false),
           error: (message) => _buildForm(context, isSaving: false),
         );
       },
@@ -345,7 +194,7 @@ class _PageFormViewState extends State<_PageFormView> {
 
   void _onStateChanged(BuildContext context, PageFormState state) {
     state.whenOrNull(
-      saved: (page) {
+      saved: () {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -458,56 +307,17 @@ class _PageFormViewState extends State<_PageFormView> {
 
   Widget _buildMainPanel() {
     return PageFormMain(
-      titleController: _titleController,
-      pageKeyController: _pageKeyController,
+      nameController: _nameController,
       slugController: _slugController,
-      captionController: _captionController,
-      bodyController: _bodyController,
-      heroTitleController: _heroTitleController,
-      heroSubtitleController: _heroSubtitleController,
-      heroImageUrlController: _heroImageUrlController,
-      heroCtaTextController: _heroCtaTextController,
-      heroCtaUrlController: _heroCtaUrlController,
+      variablesController: _variablesController,
       onSlugManualEdit: () => _autoSlug = false,
     );
   }
 
   Widget _buildSidebarPanel() {
     return PageFormSidebar(
-      metaTitleController: _metaTitleController,
-      metaDescriptionController: _metaDescriptionController,
-      metaKeywordsController: _metaKeywordsController,
-      ogTitleController: _ogTitleController,
-      ogDescriptionController: _ogDescriptionController,
-      ogImageUrlController: _ogImageUrlController,
-      noIndex: _noIndex,
-      onNoIndexChanged: (value) => setState(() => _noIndex = value),
-      noFollow: _noFollow,
-      onNoFollowChanged: (value) => setState(() => _noFollow = value),
-      template: _template,
-      onTemplateChanged: (value) => setState(() => _template = value),
-      showHeader: _showHeader,
-      onShowHeaderChanged: (value) => setState(() => _showHeader = value),
-      showFooter: _showFooter,
-      onShowFooterChanged: (value) => setState(() => _showFooter = value),
-      showBreadcrumbs: _showBreadcrumbs,
-      onShowBreadcrumbsChanged: (value) =>
-          setState(() => _showBreadcrumbs = value),
-      customCssController: _customCssController,
-      status: _status,
-      onStatusChanged: (value) => setState(() => _status = value),
-      visibility: _visibility,
-      onVisibilityChanged: (value) => setState(() => _visibility = value),
-      showInNav: _showInNav,
-      onShowInNavChanged: (value) => setState(() => _showInNav = value),
-      navLabelController: _navLabelController,
-      sortOrderController: _sortOrderController,
-      parentPageIdController: _parentPageIdController,
-      featuredImageUrlController: _featuredImageUrlController,
-      featuredImageAltController: _featuredImageAltController,
-      redirectUrlController: _redirectUrlController,
-      redirectType: _redirectType,
-      onRedirectTypeChanged: (value) => setState(() => _redirectType = value),
+      isActive: _isActive,
+      onIsActiveChanged: (value) => setState(() => _isActive = value),
     );
   }
 }

@@ -5,7 +5,6 @@ import '../../../auth/data/datasources/auth_remote_datasource.dart';
 import '../../domain/entities/page_entity.dart';
 import '../../domain/repositories/page_repository.dart';
 import '../datasources/page_remote_datasource.dart';
-import '../models/page_model.dart';
 
 /// Implementasi [PageRepository].
 class PageRepositoryImpl implements PageRepository {
@@ -18,18 +17,16 @@ class PageRepositoryImpl implements PageRepository {
   @override
   Future<Either<Failure, List<PageEntity>>> getPages({
     String? search,
-    String? status,
     int page = 1,
-    int perPage = 10,
+    int limit = 20,
   }) async {
     try {
       final response = await _remoteDataSource.getPages(
         search: search,
-        status: status,
         page: page,
-        perPage: perPage,
+        limit: limit,
       );
-      return Right(response.map((e) => e.toEntity()).toList());
+      return Right(response.items.map((e) => e.toEntity()).toList());
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, statusCode: e.statusCode));
     }
@@ -46,41 +43,33 @@ class PageRepositoryImpl implements PageRepository {
   }
 
   @override
-  Future<Either<Failure, PageEntity>> createPage(
-    PageEntity pageEntity,
-  ) async {
+  Future<Either<Failure, void>> createPage(PageEntity pageEntity) async {
     try {
-      final model = PageModel.fromEntity(pageEntity);
-      final data = model.toJson();
-      // Hapus field read-only yang tidak perlu dikirim ke server.
-      data.remove('id');
-      data.remove('created_at');
-      data.remove('updated_at');
+      final data = <String, dynamic>{
+        'name': pageEntity.name,
+        'slug': pageEntity.slug,
+        'variables': pageEntity.variables,
+      };
 
-      final response = await _remoteDataSource.createPage(data);
-      return Right(response.toEntity());
+      await _remoteDataSource.createPage(data);
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, statusCode: e.statusCode));
     }
   }
 
   @override
-  Future<Either<Failure, PageEntity>> updatePage(
-    PageEntity pageEntity,
-  ) async {
+  Future<Either<Failure, void>> updatePage(PageEntity pageEntity) async {
     try {
-      final model = PageModel.fromEntity(pageEntity);
-      final data = model.toJson();
-      // Hapus field read-only yang tidak perlu dikirim ke server.
-      data.remove('id');
-      data.remove('created_at');
-      data.remove('updated_at');
+      final data = <String, dynamic>{
+        'name': pageEntity.name,
+        'slug': pageEntity.slug,
+        'variables': pageEntity.variables,
+        'is_active': pageEntity.isActive,
+      };
 
-      final response = await _remoteDataSource.updatePage(
-        pageEntity.id,
-        data,
-      );
-      return Right(response.toEntity());
+      await _remoteDataSource.updatePage(pageEntity.id, data);
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, statusCode: e.statusCode));
     }

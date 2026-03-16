@@ -10,11 +10,11 @@ class CreateUserUseCase {
 
   const CreateUserUseCase(this._repository);
 
-  /// Returns [Right(CmsUser)] jika berhasil.
-  Future<Either<Failure, CmsUser>> call(
+  /// Returns [Right(void)] jika berhasil.
+  Future<Either<Failure, void>> call(
     CmsUser user, {
-    required String password,
+    required String passwordHash,
   }) {
-    return _repository.createUser(user, password: password);
+    return _repository.createUser(user, passwordHash: passwordHash);
   }
 }
