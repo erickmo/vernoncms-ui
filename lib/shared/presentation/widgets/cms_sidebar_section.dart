@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 
-/// Widget untuk section (grup) menu di sidebar yang bisa di-expand/collapse.
+/// Widget section (grup) menu sidebar — gaya MatDash.
 class CmsSidebarSection extends StatelessWidget {
   /// Judul section.
   final String title;
@@ -34,8 +34,16 @@ class CmsSidebarSection extends StatelessWidget {
     if (isSidebarCollapsed) {
       return Column(
         children: [
-          const Divider(color: AppColors.sidebarItemActive, height: 1),
-          const SizedBox(height: AppDimensions.spacingS),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppDimensions.spacingS,
+              horizontal: AppDimensions.spacingS,
+            ),
+            child: Container(
+              height: 1,
+              color: AppColors.divider,
+            ),
+          ),
           ...children,
         ],
       );
@@ -45,13 +53,27 @@ class CmsSidebarSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(),
-        if (isExpanded) ...children,
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Padding(
+            padding: const EdgeInsets.only(bottom: AppDimensions.spacingXS),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children,
+            ),
+          ),
+          crossFadeState: isExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 200),
+        ),
       ],
     );
   }
 
   Widget _buildSectionHeader() => InkWell(
         onTap: onToggle,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusS),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppDimensions.spacingM,
@@ -66,7 +88,7 @@ class CmsSidebarSection extends StatelessWidget {
                     color: AppColors.sidebarSectionTitle,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+                    letterSpacing: 1.5,
                   ),
                 ),
               ),

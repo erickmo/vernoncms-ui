@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 
-/// Widget untuk satu item menu di sidebar.
+/// Widget item menu sidebar — gaya MatDash white sidebar.
 class CmsSidebarItem extends StatelessWidget {
   /// Icon menu.
   final IconData icon;
@@ -31,38 +31,55 @@ class CmsSidebarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isActive ? AppColors.sidebarItemActive : Colors.transparent;
-    final textColor =
-        isActive ? AppColors.sidebarTextActive : AppColors.sidebarText;
-
     final child = Material(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppDimensions.radiusM),
         hoverColor: AppColors.sidebarItemHover,
-        child: Padding(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
           padding: EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingM,
-            vertical: isCollapsed
-                ? AppDimensions.spacingM
-                : AppDimensions.spacingS + 2,
+            horizontal: isCollapsed
+                ? AppDimensions.spacingS
+                : AppDimensions.spacingM,
+            vertical: AppDimensions.spacingS + 2,
+          ),
+          decoration: BoxDecoration(
+            color: isActive ? AppColors.sidebarItemActiveBg : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusM),
           ),
           child: isCollapsed
-              ? Center(child: Icon(icon, color: textColor, size: AppDimensions.iconM))
+              ? Center(
+                  child: Icon(
+                    icon,
+                    color: isActive
+                        ? AppColors.sidebarItemActive
+                        : AppColors.sidebarText,
+                    size: AppDimensions.iconM,
+                  ),
+                )
               : Row(
                   children: [
-                    Icon(icon, color: textColor, size: AppDimensions.iconM),
-                    const SizedBox(width: AppDimensions.spacingS),
+                    Icon(
+                      icon,
+                      color: isActive
+                          ? AppColors.sidebarItemActive
+                          : AppColors.sidebarText,
+                      size: AppDimensions.iconM,
+                    ),
+                    const SizedBox(width: AppDimensions.spacingM),
                     Expanded(
                       child: Text(
                         label,
                         style: TextStyle(
-                          color: textColor,
+                          color: isActive
+                              ? AppColors.sidebarTextActive
+                              : AppColors.sidebarText,
                           fontSize: 14,
-                          fontWeight:
-                              isActive ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isActive
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

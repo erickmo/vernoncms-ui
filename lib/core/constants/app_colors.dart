@@ -1,46 +1,58 @@
 import 'package:flutter/material.dart';
 
-/// Warna standar aplikasi.
+/// Warna standar aplikasi — terinspirasi dari MatDash Material Design 3.
 /// Selalu gunakan konstanta ini, jangan hardcode hex color.
 class AppColors {
   AppColors._();
 
-  // Primary
-  static const Color primary = Color(0xFF1565C0);
-  static const Color primaryLight = Color(0xFF5E92F3);
-  static const Color primaryDark = Color(0xFF003C8F);
+  // Primary — MatDash Blue (#5D87FF)
+  static const Color primary = Color(0xFF5D87FF);
+  static const Color primaryLight = Color(0xFFECF2FF);
+  static const Color primaryDark = Color(0xFF4570EA);
 
-  // Secondary
-  static const Color secondary = Color(0xFF00897B);
-  static const Color secondaryLight = Color(0xFF4EBAAA);
-  static const Color secondaryDark = Color(0xFF005B4F);
+  // Secondary — MatDash Cyan (#49BEFF)
+  static const Color secondary = Color(0xFF49BEFF);
+  static const Color secondaryLight = Color(0xFFE8F7FF);
+  static const Color secondaryDark = Color(0xFF23AFDB);
 
   // Neutral
-  static const Color background = Color(0xFFF5F5F5);
+  static const Color background = Color(0xFFF2F6FA);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color divider = Color(0xFFE0E0E0);
+  static const Color divider = Color(0xFFE5EAF2);
 
   // Text
-  static const Color textPrimary = Color(0xFF212121);
-  static const Color textSecondary = Color(0xFF757575);
-  static const Color textHint = Color(0xFFBDBDBD);
+  static const Color textPrimary = Color(0xFF2A3547);
+  static const Color textSecondary = Color(0xFF5A6A85);
+  static const Color textHint = Color(0xFFA0AFC0);
 
-  // Status
-  static const Color success = Color(0xFF2E7D32);
-  static const Color warning = Color(0xFFF57F17);
-  static const Color error = Color(0xFFB71C1C);
-  static const Color info = Color(0xFF0277BD);
+  // Status — MatDash palette
+  static const Color success = Color(0xFF13DEB9);
+  static const Color successLight = Color(0xFFE6FFFA);
+  static const Color warning = Color(0xFFFFAE1F);
+  static const Color warningLight = Color(0xFFFEF5E5);
+  static const Color error = Color(0xFFFA896B);
+  static const Color errorLight = Color(0xFFFDEDE8);
+  static const Color info = Color(0xFF539BFF);
+  static const Color infoLight = Color(0xFFEBF3FE);
 
-  // Sidebar
-  static const Color sidebarBackground = Color(0xFF1E293B);
-  static const Color sidebarItemActive = Color(0xFF334155);
-  static const Color sidebarItemHover = Color(0xFF2D3A4D);
-  static const Color sidebarText = Color(0xFFE2E8F0);
-  static const Color sidebarTextActive = Color(0xFFFFFFFF);
-  static const Color sidebarSectionTitle = Color(0xFF94A3B8);
+  // Sidebar — White sidebar style (MatDash)
+  static const Color sidebarBackground = Color(0xFFFFFFFF);
+  static const Color sidebarBorder = Color(0xFFE5EAF2);
+  static const Color sidebarItemActive = Color(0xFF5D87FF);
+  static const Color sidebarItemActiveBg = Color(0xFFECF2FF);
+  static const Color sidebarItemHover = Color(0xFFF4F7FF);
+  static const Color sidebarText = Color(0xFF5A6A85);
+  static const Color sidebarTextActive = Color(0xFF5D87FF);
+  static const Color sidebarSectionTitle = Color(0xFFA0AFC0);
 
   // Chart
-  static const Color chartLine = Color(0xFF1565C0);
-  static const Color chartFill = Color(0x331565C0);
-  static const Color chartGrid = Color(0xFFE0E0E0);
+  static const Color chartLine = Color(0xFF5D87FF);
+  static const Color chartFill = Color(0x335D87FF);
+  static const Color chartGrid = Color(0xFFE5EAF2);
+
+  // Accent card colors (stat cards)
+  static const Color cardAccentBlue = Color(0xFF5D87FF);
+  static const Color cardAccentGreen = Color(0xFF13DEB9);
+  static const Color cardAccentOrange = Color(0xFFFFAE1F);
+  static const Color cardAccentCyan = Color(0xFF49BEFF);
 }
