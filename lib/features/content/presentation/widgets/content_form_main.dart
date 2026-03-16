@@ -138,25 +138,29 @@ class ContentFormMain extends StatelessWidget {
               horizontal: AppDimensions.spacingS,
               vertical: AppDimensions.spacingM,
             ),
-            child: QuillEditor.basic(
-              controller: quillController,
-              config: QuillEditorConfig(
-                placeholder: AppStrings.contentBodyHint,
-                padding: EdgeInsets.zero,
-                autoFocus: false,
-                expands: false,
-                scrollable: false,
-                customStyles: DefaultStyles(
-                  paragraph: DefaultTextBlockStyle(
-                    const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                      height: 1.7,
+            child: Localizations.override(
+              context: context,
+              locale: const Locale('en', ''),
+              child: QuillEditor.basic(
+                controller: quillController,
+                config: QuillEditorConfig(
+                  placeholder: AppStrings.contentBodyHint,
+                  padding: EdgeInsets.zero,
+                  autoFocus: false,
+                  expands: false,
+                  scrollable: false,
+                  customStyles: DefaultStyles(
+                    paragraph: DefaultTextBlockStyle(
+                      const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                        height: 1.7,
+                      ),
+                      const HorizontalSpacing(0, 0),
+                      const VerticalSpacing(2, 2),
+                      const VerticalSpacing(0, 0),
+                      null,
                     ),
-                    const HorizontalSpacing(0, 0),
-                    const VerticalSpacing(2, 2),
-                    const VerticalSpacing(0, 0),
-                    null,
                   ),
                 ),
               ),
@@ -165,31 +169,35 @@ class ContentFormMain extends StatelessWidget {
         ],
       );
 
-  Widget _buildEditorToolbar(BuildContext context) => QuillSimpleToolbar(
-        controller: quillController,
-        config: const QuillSimpleToolbarConfig(
-          showFontFamily: false,
-          showFontSize: false,
-          showSubscript: false,
-          showSuperscript: false,
-          showColorButton: false,
-          showBackgroundColorButton: false,
-          showInlineCode: true,
-          showListCheck: false,
-          showCodeBlock: false,
-          showAlignmentButtons: false,
-          showIndent: false,
-          showRedo: true,
-          showUndo: true,
-          showDividers: true,
-          showClearFormat: true,
-          showSearchButton: false,
-          showClipboardPaste: false,
-          showClipboardCopy: false,
-          showClipboardCut: false,
-          toolbarSize: 40,
-          toolbarIconAlignment: WrapAlignment.start,
-          toolbarSectionSpacing: 4,
+  Widget _buildEditorToolbar(BuildContext context) => Localizations.override(
+        context: context,
+        locale: const Locale('en', ''),
+        child: QuillSimpleToolbar(
+          controller: quillController,
+          config: const QuillSimpleToolbarConfig(
+            showFontFamily: false,
+            showFontSize: false,
+            showSubscript: false,
+            showSuperscript: false,
+            showColorButton: false,
+            showBackgroundColorButton: false,
+            showInlineCode: true,
+            showListCheck: false,
+            showCodeBlock: false,
+            showAlignmentButtons: false,
+            showIndent: false,
+            showRedo: true,
+            showUndo: true,
+            showDividers: true,
+            showClearFormat: true,
+            showSearchButton: false,
+            showClipboardPaste: false,
+            showClipboardCopy: false,
+            showClipboardCut: false,
+            toolbarSize: 40,
+            toolbarIconAlignment: WrapAlignment.start,
+            toolbarSectionSpacing: 4,
+          ),
         ),
       );
 }
