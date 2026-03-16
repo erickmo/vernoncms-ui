@@ -73,7 +73,7 @@ class MediaRemoteDataSourceImpl implements MediaRemoteDataSource {
       }
 
       final response = await _apiClient.dio.get(
-        '/api/media',
+        '/api/v1/media',
         queryParameters: queryParameters,
       );
 
@@ -92,7 +92,7 @@ class MediaRemoteDataSourceImpl implements MediaRemoteDataSource {
   @override
   Future<MediaFileModel> getMediaDetail(String id) async {
     try {
-      final response = await _apiClient.dio.get('/api/media/$id');
+      final response = await _apiClient.dio.get('/api/v1/media/$id');
       return MediaFileModel.fromJson(
         response.data as Map<String, dynamic>,
       );
@@ -108,7 +108,7 @@ class MediaRemoteDataSourceImpl implements MediaRemoteDataSource {
   Future<MediaFileModel> uploadMedia(Map<String, dynamic> data) async {
     try {
       final response = await _apiClient.dio.post(
-        '/api/media/upload',
+        '/api/v1/media/upload',
         data: data,
       );
       return MediaFileModel.fromJson(
@@ -129,7 +129,7 @@ class MediaRemoteDataSourceImpl implements MediaRemoteDataSource {
   ) async {
     try {
       final response = await _apiClient.dio.put(
-        '/api/media/$id',
+        '/api/v1/media/$id',
         data: data,
       );
       return MediaFileModel.fromJson(
@@ -146,7 +146,7 @@ class MediaRemoteDataSourceImpl implements MediaRemoteDataSource {
   @override
   Future<void> deleteMedia(String id) async {
     try {
-      await _apiClient.dio.delete('/api/media/$id');
+      await _apiClient.dio.delete('/api/v1/media/$id');
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -158,7 +158,7 @@ class MediaRemoteDataSourceImpl implements MediaRemoteDataSource {
   @override
   Future<List<String>> getMediaFolders() async {
     try {
-      final response = await _apiClient.dio.get('/api/media/folders');
+      final response = await _apiClient.dio.get('/api/v1/media/folders');
       final list = response.data as List<dynamic>;
       return list.map((e) => e as String).toList();
     } on DioException catch (e) {

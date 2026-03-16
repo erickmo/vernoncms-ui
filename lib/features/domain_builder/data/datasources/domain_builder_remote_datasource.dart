@@ -45,7 +45,7 @@ class DomainBuilderRemoteDataSourceImpl
   @override
   Future<List<DomainDefinitionModel>> getDomains() async {
     try {
-      final response = await _apiClient.dio.get('/api/domains');
+      final response = await _apiClient.dio.get('/api/v1/domains');
 
       final list = response.data as List<dynamic>;
       return list
@@ -63,7 +63,7 @@ class DomainBuilderRemoteDataSourceImpl
   @override
   Future<DomainDefinitionModel> getDomainDetail(String id) async {
     try {
-      final response = await _apiClient.dio.get('/api/domains/$id');
+      final response = await _apiClient.dio.get('/api/v1/domains/$id');
       return DomainDefinitionModel.fromJson(
         response.data as Map<String, dynamic>,
       );
@@ -81,7 +81,7 @@ class DomainBuilderRemoteDataSourceImpl
   ) async {
     try {
       final response = await _apiClient.dio.post(
-        '/api/domains',
+        '/api/v1/domains',
         data: data,
       );
       return DomainDefinitionModel.fromJson(
@@ -102,7 +102,7 @@ class DomainBuilderRemoteDataSourceImpl
   ) async {
     try {
       final response = await _apiClient.dio.put(
-        '/api/domains/$id',
+        '/api/v1/domains/$id',
         data: data,
       );
       return DomainDefinitionModel.fromJson(
@@ -119,7 +119,7 @@ class DomainBuilderRemoteDataSourceImpl
   @override
   Future<void> deleteDomain(String id) async {
     try {
-      await _apiClient.dio.delete('/api/domains/$id');
+      await _apiClient.dio.delete('/api/v1/domains/$id');
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),

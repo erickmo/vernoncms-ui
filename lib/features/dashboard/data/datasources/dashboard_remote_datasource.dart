@@ -27,7 +27,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   @override
   Future<DashboardStatsModel> getStats() async {
     try {
-      final response = await _apiClient.dio.get('/api/dashboard/stats');
+      final response = await _apiClient.dio.get('/api/v1/dashboard/stats');
       return DashboardStatsModel.fromJson(
         response.data as Map<String, dynamic>,
       );
@@ -43,7 +43,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   Future<List<DailyContentModel>> getDailyContent(int days) async {
     try {
       final response = await _apiClient.dio.get(
-        '/api/dashboard/daily-content',
+        '/api/v1/dashboard/daily-content',
         queryParameters: {'days': days},
       );
       final list = response.data as List<dynamic>;

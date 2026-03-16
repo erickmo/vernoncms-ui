@@ -82,7 +82,7 @@ class DomainRecordsRemoteDataSourceImpl
       }
 
       final response = await _apiClient.dio.get(
-        '/api/domains/$domainSlug/records',
+        '/api/v1/domains/$domainSlug/records',
         queryParameters: queryParameters,
       );
 
@@ -105,7 +105,7 @@ class DomainRecordsRemoteDataSourceImpl
   }) async {
     try {
       final response = await _apiClient.dio.get(
-        '/api/domains/$domainSlug/records/$id',
+        '/api/v1/domains/$domainSlug/records/$id',
       );
       return DomainRecordModel.fromJson(
         response.data as Map<String, dynamic>,
@@ -125,7 +125,7 @@ class DomainRecordsRemoteDataSourceImpl
   }) async {
     try {
       final response = await _apiClient.dio.post(
-        '/api/domains/$domainSlug/records',
+        '/api/v1/domains/$domainSlug/records',
         data: {'data': data},
       );
       return DomainRecordModel.fromJson(
@@ -147,7 +147,7 @@ class DomainRecordsRemoteDataSourceImpl
   }) async {
     try {
       final response = await _apiClient.dio.put(
-        '/api/domains/$domainSlug/records/$id',
+        '/api/v1/domains/$domainSlug/records/$id',
         data: {'data': data},
       );
       return DomainRecordModel.fromJson(
@@ -167,7 +167,7 @@ class DomainRecordsRemoteDataSourceImpl
     required String id,
   }) async {
     try {
-      await _apiClient.dio.delete('/api/domains/$domainSlug/records/$id');
+      await _apiClient.dio.delete('/api/v1/domains/$domainSlug/records/$id');
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -182,7 +182,7 @@ class DomainRecordsRemoteDataSourceImpl
   }) async {
     try {
       final response = await _apiClient.dio.get(
-        '/api/domains/$domainSlug/records/options',
+        '/api/v1/domains/$domainSlug/records/options',
       );
 
       final list = response.data as List<dynamic>;

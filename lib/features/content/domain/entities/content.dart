@@ -36,10 +36,10 @@ class Content extends Equatable {
   final DateTime? publishedAt;
 
   /// Tanggal dibuat.
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// Tanggal terakhir diperbarui.
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   const Content({
     required this.id,
@@ -53,8 +53,8 @@ class Content extends Equatable {
     this.authorId,
     this.metadata = const {},
     this.publishedAt,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   @override

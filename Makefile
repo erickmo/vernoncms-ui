@@ -6,9 +6,9 @@ APP_NAME=vernon_cms_ui
 get:
 	flutter pub get
 
-## Run (BASE_URL dikonfigurasi via .env)
+## Run (BASE_URL dikonfigurasi via .env, port 3000 untuk match CORS backend)
 run:
-	flutter run -d chrome
+	flutter run -d chrome --web-port=3000
 
 ## Build (copy .env yang sesuai sebelum build)
 build-web:

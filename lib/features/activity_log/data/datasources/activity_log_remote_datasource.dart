@@ -63,7 +63,7 @@ class ActivityLogRemoteDataSourceImpl implements ActivityLogRemoteDataSource {
       }
 
       final response = await _apiClient.dio.get(
-        '/api/activity-logs',
+        '/api/v1/activity-logs',
         queryParameters: queryParameters,
       );
 

@@ -41,7 +41,7 @@ class ApiTokenRemoteDataSourceImpl implements ApiTokenRemoteDataSource {
   @override
   Future<List<ApiTokenModel>> getTokens() async {
     try {
-      final response = await _apiClient.dio.get('/api/tokens');
+      final response = await _apiClient.dio.get('/api/v1/tokens');
 
       final list = response.data as List<dynamic>;
       return list
@@ -59,7 +59,7 @@ class ApiTokenRemoteDataSourceImpl implements ApiTokenRemoteDataSource {
   Future<ApiTokenModel> createToken(Map<String, dynamic> data) async {
     try {
       final response = await _apiClient.dio.post(
-        '/api/tokens',
+        '/api/v1/tokens',
         data: data,
       );
       return ApiTokenModel.fromJson(
@@ -80,7 +80,7 @@ class ApiTokenRemoteDataSourceImpl implements ApiTokenRemoteDataSource {
   ) async {
     try {
       final response = await _apiClient.dio.put(
-        '/api/tokens/$id',
+        '/api/v1/tokens/$id',
         data: data,
       );
       return ApiTokenModel.fromJson(
@@ -97,7 +97,7 @@ class ApiTokenRemoteDataSourceImpl implements ApiTokenRemoteDataSource {
   @override
   Future<void> deleteToken(String id) async {
     try {
-      await _apiClient.dio.delete('/api/tokens/$id');
+      await _apiClient.dio.delete('/api/v1/tokens/$id');
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e),
@@ -110,7 +110,7 @@ class ApiTokenRemoteDataSourceImpl implements ApiTokenRemoteDataSource {
   Future<ApiTokenModel> toggleTokenActive(String id) async {
     try {
       final response = await _apiClient.dio.put(
-        '/api/tokens/$id/toggle-active',
+        '/api/v1/tokens/$id/toggle-active',
       );
       return ApiTokenModel.fromJson(
         response.data as Map<String, dynamic>,

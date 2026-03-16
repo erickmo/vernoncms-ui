@@ -26,7 +26,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
   @override
   Future<SiteSettingsModel> getSettings() async {
     try {
-      final response = await _apiClient.dio.get('/api/settings');
+      final response = await _apiClient.dio.get('/api/v1/settings');
       return SiteSettingsModel.fromJson(
         response.data as Map<String, dynamic>,
       );
@@ -42,7 +42,7 @@ class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
   Future<SiteSettingsModel> updateSettings(Map<String, dynamic> data) async {
     try {
       final response = await _apiClient.dio.put(
-        '/api/settings',
+        '/api/v1/settings',
         data: data,
       );
       return SiteSettingsModel.fromJson(

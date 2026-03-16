@@ -38,6 +38,7 @@ class ContentModel {
   final String? authorId;
 
   /// Metadata fleksibel.
+  @JsonKey(defaultValue: {})
   final Map<String, dynamic> metadata;
 
   /// Tanggal dipublikasikan.
@@ -46,11 +47,11 @@ class ContentModel {
 
   /// Tanggal dibuat.
   @JsonKey(name: 'created_at')
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   /// Tanggal terakhir diperbarui.
   @JsonKey(name: 'updated_at')
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
 
   const ContentModel({
     required this.id,
@@ -64,8 +65,8 @@ class ContentModel {
     this.authorId,
     this.metadata = const {},
     this.publishedAt,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   /// Parse dari JSON.
