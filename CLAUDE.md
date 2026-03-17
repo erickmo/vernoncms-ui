@@ -92,6 +92,11 @@ make build-web    # build release web
 - Activity: `/api/activity-logs`
 - Tokens: `/api/tokens`
 
+## Documentation
+- **PRD & Requirements:** `docs/requirements/prd-vernon-cms-ui.md`
+- **Backend Development Requests:** `docs/backend_requirements/backend_development_requests.md` (11 endpoints pending)
+- **Domain Builder Specs:** `docs/backend-prompt-domain-builder.md`
+
 ## Important Notes
 - BASE_URL diset via --dart-define saat run/build, bukan hardcode
 - Wajib run `make gen` setelah buat/ubah freezed atau json_serializable
